@@ -3,6 +3,7 @@ const commonjs = require("@rollup/plugin-commonjs");
 const typescript = require("@rollup/plugin-typescript");
 const peerDepsExternal = require("rollup-plugin-peer-deps-external");
 const terser = require("@rollup/plugin-terser");
+const svg = require("rollup-plugin-svg");
 const path = require("path");
 const { babel } = require("@rollup/plugin-babel");
 
@@ -23,10 +24,13 @@ module.exports = {
   plugins: [
     peerDepsExternal(),
     resolve({
-      extensions: [".js", ".jsx", ".ts", ".tsx"],
+      extensions: [".js", ".jsx", ".ts", ".tsx", ".svg"],
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
+    }),
+    svg({
+      base64: true,
     }),
     commonjs({
       include: "node_modules/**",

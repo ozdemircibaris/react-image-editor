@@ -1,73 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
 import { IconNamesType } from "../../constants/icons";
 
-// Cache for processed SVG content (clear cache on code reload)
-const svgCache = new Map<string, string>();
-// Cache for ongoing fetch requests to avoid duplicates
-const fetchPromises = new Map<string, Promise<string>>();
+// Import SVG icons as React components
+// These will be transformed by rollup-plugin-svg
+import blurIcon from "../../../public/assets/icons/blur.svg";
+import circleIcon from "../../../public/assets/icons/circle.svg";
+import cropIcon from "../../../public/assets/icons/crop.svg";
+import cursorIcon from "../../../public/assets/icons/cursor.svg";
+import pencilIcon from "../../../public/assets/icons/pencil.svg";
+import redoIcon from "../../../public/assets/icons/redo.svg";
+import squareIcon from "../../../public/assets/icons/square.svg";
+import undoIcon from "../../../public/assets/icons/undo.svg";
 
-/**
- * Preload icon(s) for better performance
- * Useful for preloading critical icons before they are needed
- */
-export const preloadIcon = async (iconNames: IconNamesType | IconNamesType[]): Promise<void> => {
-  const names = Array.isArray(iconNames) ? iconNames : [iconNames];
-
-  await Promise.all(
-    names.map(async (name) => {
-      try {
-        // Skip if already cached
-        if (svgCache.has(name)) return;
-
-        // Skip if already being fetched
-        if (fetchPromises.has(name)) {
-          await fetchPromises.get(name);
-          return;
-        }
-
-        const fetchPromise = fetch(`/assets/icons/${name}.svg`)
-          .then(async (response) => {
-            if (!response.ok) {
-              throw new Error(`SVG not found: ${name}.svg`);
-            }
-
-            const originalSvgText = await response.text();
-
-            // Extract stroke-width from original BEFORE any replacements
-            const strokeWidthMatch = originalSvgText.match(/stroke-width="([^"]*)"/);
-            const originalStrokeWidth = strokeWidthMatch ? strokeWidthMatch[1] : null;
-
-            // Now do the replacements
-            let svgText = originalSvgText;
-            svgText = svgText.replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"');
-            svgText = svgText.replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"');
-            svgText = svgText.replace(/stop-color="[^"]*"/g, 'stop-color="currentColor"');
-            svgText = svgText.replace(/width="[^"]*"/g, "");
-            svgText = svgText.replace(/height="[^"]*"/g, "");
-
-            // Cache both processed SVG and original stroke-width
-            const cacheData = JSON.stringify({
-              svg: svgText,
-              strokeWidth: originalStrokeWidth,
-            });
-
-            svgCache.set(name, cacheData);
-            return cacheData;
-          })
-          .finally(() => {
-            fetchPromises.delete(name);
-          });
-
-        fetchPromises.set(name, fetchPromise);
-        await fetchPromise;
-      } catch (err) {
-        console.warn(`Failed to preload icon "${name}":`, err);
-      }
-    }),
-  );
+// Icon mapping - only include icons that actually exist
+const iconMap: Partial<Record<IconNamesType, string>> = {
+  blur: blurIcon,
+  circle: circleIcon,
+  crop: cropIcon,
+  cursor: cursorIcon,
+  pencil: pencilIcon,
+  redo: redoIcon,
+  square: squareIcon,
+  undo: undoIcon,
 };
 
 interface IconProps {
@@ -84,124 +39,38 @@ interface IconProps {
 }
 
 /**
- * Simple Icon component for rendering SVG icons from files
+ * Icon component that renders SVG icons inline
  *
  * Features:
- * - Loads SVG files from public/assets/icons/{name}.svg
- * - Preserves original stroke-width if present in SVG
- * - Memory cache to avoid re-fetching
- * - Color control through CSS classes
+ * - Inline SVG rendering for better performance
+ * - Color control through CSS classes (text-*)
  * - Type-safe icon names
+ * - Bundled with the library (no external dependencies)
  */
 export const Icon = ({ name, width = 20, height = 20, className, title }: IconProps) => {
-  const [svgContent, setSvgContent] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const svgDataUrl = iconMap[name];
 
-  useEffect(() => {
-    const loadSvg = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-
-        // Check cache first
-
-        if (svgCache.has(name)) {
-          setSvgContent(svgCache.get(name)!);
-          setLoading(false);
-          return;
-        }
-
-        // Check if already being fetched
-        if (fetchPromises.has(name)) {
-          const cachedResult = await fetchPromises.get(name)!;
-
-          setSvgContent(cachedResult);
-          setLoading(false);
-          return;
-        }
-
-        // Fetch new icon
-        const fetchPromise = fetch(`/assets/icons/${name}.svg`)
-          .then(async (response) => {
-            if (!response.ok) {
-              throw new Error(`SVG not found: ${name}.svg`);
-            }
-
-            const originalSvgText = await response.text();
-
-            // Extract stroke-width from original BEFORE any replacements
-            const strokeWidthMatch = originalSvgText.match(/stroke-width="([^"]*)"/);
-            const originalStrokeWidth = strokeWidthMatch ? strokeWidthMatch[1] : null;
-
-            // Now do the replacements
-            let svgText = originalSvgText;
-            svgText = svgText.replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"');
-            svgText = svgText.replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"');
-            svgText = svgText.replace(/stop-color="[^"]*"/g, 'stop-color="currentColor"');
-            svgText = svgText.replace(/width="[^"]*"/g, "");
-            svgText = svgText.replace(/height="[^"]*"/g, "");
-
-            // Cache both processed SVG and original stroke-width
-            const cacheData = JSON.stringify({
-              svg: svgText,
-              strokeWidth: originalStrokeWidth,
-            });
-
-            svgCache.set(name, cacheData);
-            return cacheData;
-          })
-          .finally(() => {
-            fetchPromises.delete(name);
-          });
-
-        fetchPromises.set(name, fetchPromise);
-        const svgText = await fetchPromise;
-
-        setSvgContent(svgText);
-      } catch (err) {
-        console.warn(`Icon "${name}" could not be loaded:`, err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSvg();
-  }, [name]);
-
-  if (loading) {
-    return <div className={`inline-block ${className || ""}`} style={{ width, height }} />;
-  }
-
-  if (error || !svgContent) {
-    console.warn(`Icon "${name}" not found`);
+  if (!svgDataUrl) {
+    console.warn(`Icon "${name}" not found in iconMap`);
     return null;
   }
 
-  // Parse cached data
-  let actualSvgContent = svgContent;
-  let originalStrokeWidth = undefined;
+  // Extract SVG content from data URL
+  const svgContent = svgDataUrl.replace(/^data:image\/svg\+xml;base64,/, "");
+  const decodedSvg = atob(svgContent);
 
-  try {
-    const parsedData = JSON.parse(svgContent);
-    if (parsedData.svg) {
-      actualSvgContent = parsedData.svg;
-      originalStrokeWidth = parsedData.strokeWidth;
-    }
-  } catch {
-    // Not JSON, use as-is (backward compatibility)
-    const strokeWidthMatch = svgContent.match(/stroke-width="([^"]*)"/);
-    originalStrokeWidth = strokeWidthMatch ? strokeWidthMatch[1] : undefined;
+  // Parse SVG to extract viewBox and inner content
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(decodedSvg, "image/svg+xml");
+  const svgElement = svgDoc.querySelector("svg");
+
+  if (!svgElement) {
+    console.warn(`Invalid SVG for icon "${name}"`);
+    return null;
   }
 
-  // Extract viewBox from actual SVG
-  const viewBoxMatch = actualSvgContent.match(/viewBox="([^"]*)"/);
-  const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 20 20";
-
-  // Extract inner content
-  const svgInnerMatch = actualSvgContent.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
-  const svgInnerContent = svgInnerMatch ? svgInnerMatch[1] : actualSvgContent;
+  const viewBox = svgElement.getAttribute("viewBox") || "0 0 20 20";
+  const innerHTML = svgElement.innerHTML;
 
   return (
     <svg
@@ -211,13 +80,12 @@ export const Icon = ({ name, width = 20, height = 20, className, title }: IconPr
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`inline-block ${className || ""}`}
-      {...(originalStrokeWidth && { style: { strokeWidth: originalStrokeWidth } })}
       role="img"
       aria-hidden={!title}
       {...(title && { "aria-label": title })}
     >
       {title && <title>{title}</title>}
-      <g dangerouslySetInnerHTML={{ __html: svgInnerContent }} />
+      <g dangerouslySetInnerHTML={{ __html: innerHTML }} />
     </svg>
   );
 };
