@@ -35,7 +35,8 @@ module.exports = {
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: "./dist",
-      exclude: ["src/app/**"],
+      exclude: ["src/app/**", "**/*.test.ts", "**/*.test.tsx"],
+      outDir: "./dist",
     }),
     babel({
       extensions: [".js", ".jsx", ".ts", ".tsx"],

@@ -12,7 +12,7 @@ import { useUndoRedo } from "./hooks/useUndoRedo";
 import { Toolbar } from "./Toolbar";
 import type { CustomFabricObject, CustomFabricImage, CustomFabricPath, FabricSelectionEvent } from "./types";
 
-interface IImageEditorProps {
+export interface IImageEditorProps {
   imageUrl: string;
   onSave: (imageBlob: Blob) => void;
   onCancel: () => void;

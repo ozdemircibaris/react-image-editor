@@ -20,8 +20,9 @@
     ],
     "declaration": true,
     "declarationDir": "./dist",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "emitDeclarationOnly": false
   },
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".next"]
+  "exclude": ["node_modules", "dist", ".next", "src/app/**"]
 }
