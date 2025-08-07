@@ -59,18 +59,13 @@ export const Icon = ({ name, width = 20, height = 20, className, title }: IconPr
   const svgContent = svgDataUrl.replace(/^data:image\/svg\+xml;base64,/, "");
   const decodedSvg = atob(svgContent);
 
-  // Parse SVG to extract viewBox and inner content
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(decodedSvg, "image/svg+xml");
-  const svgElement = svgDoc.querySelector("svg");
+  // Parse SVG using regex for better compatibility
+  const viewBoxMatch = decodedSvg.match(/viewBox=["']([^"']+)["']/);
+  const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 20 20";
 
-  if (!svgElement) {
-    console.warn(`Invalid SVG for icon "${name}"`);
-    return null;
-  }
-
-  const viewBox = svgElement.getAttribute("viewBox") || "0 0 20 20";
-  const innerHTML = svgElement.innerHTML;
+  // Extract inner content by removing the outer <svg> tag
+  const innerContentMatch = decodedSvg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+  const innerContent = innerContentMatch ? innerContentMatch[1] : decodedSvg;
 
   return (
     <svg
@@ -85,7 +80,7 @@ export const Icon = ({ name, width = 20, height = 20, className, title }: IconPr
       {...(title && { "aria-label": title })}
     >
       {title && <title>{title}</title>}
-      <g dangerouslySetInnerHTML={{ __html: innerHTML }} />
+      <g dangerouslySetInnerHTML={{ __html: innerContent }} />
     </svg>
   );
 };

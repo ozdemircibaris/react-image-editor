@@ -44,9 +44,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors text-white hover:bg-white/15 ${
-        isActive ? "bg-white/15" : ""
-      } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      className={`toolbar-button ${isActive ? "active" : ""} ${disabled ? "disabled" : ""}`}
       title={title}
     >
       <Icon name={iconName} width={20} height={20} className="text-white" />
@@ -62,15 +60,13 @@ interface ColorPaletteProps {
 
 const ColorPalette: React.FC<ColorPaletteProps> = ({ currentColor, onColorChange }) => {
   return (
-    <div className="p-3 bg-[#553529] rounded-lg shadow-lg">
-      <div className="flex flex-wrap gap-2 max-w-48">
+    <div className="color-palette">
+      <div className="color-palette-grid">
         {PREDEFINED_COLORS.map((color) => (
           <button
             key={color}
             onClick={() => onColorChange(color)}
-            className={`w-6 h-6 rounded border-2 transition-all ${
-              currentColor === color ? "border-white/20 scale-110" : "border-white/10"
-            }`}
+            className={`color-button ${currentColor === color ? "active" : ""}`}
             style={{ backgroundColor: color }}
             title={color}
           />
@@ -88,9 +84,9 @@ interface WidthSliderProps {
 
 const WidthSlider: React.FC<WidthSliderProps> = ({ currentWidth, onWidthChange }) => {
   return (
-    <div className="p-3 rounded-lg min-w-96">
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium text-white">Stroke Width:</label>
+    <div className="width-slider">
+      <div className="width-slider-content">
+        <label className="width-slider-label">Stroke Width:</label>
         <Slider
           size="sm"
           step={1}
@@ -98,15 +94,9 @@ const WidthSlider: React.FC<WidthSliderProps> = ({ currentWidth, onWidthChange }
           maxValue={20}
           value={currentWidth}
           onChange={(value) => onWidthChange(value as number)}
-          className="flex-1 data-[fill-start=true]:!border-s-primary-orange data-[fill-end=true]:!border-e-primary-orange [&_[data-fill-start=true]]:!border-s-primary-orange [&_[data-fill-end=true]]:!border-e-primary-orange [&_.slider-filler]:!bg-primary-orange [&_[data-slot=filler]]:!bg-primary-orange [&_[data-slot=thumb]]:!bg-primary-orange [&_[data-slot=thumb]]:!border-primary-orange"
-          classNames={{
-            track:
-              "bg-gray-300 data-[fill-start=true]:!border-s-primary-orange data-[fill-end=true]:!border-e-primary-orange",
-            filler: "!bg-primary-orange",
-            thumb: "!bg-primary-orange !border-primary-orange",
-          }}
+          className="width-slider-input"
         />
-        <span className="text-sm text-white w-8">{currentWidth}px</span>
+        <span className="width-slider-value">{currentWidth}px</span>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 {
   "name": "@ozdemircibaris/react-image-editor",
   "private": false,
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "A powerful React image editor component with blur, crop, shapes, and undo/redo functionality",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -58,6 +58,7 @@
     "eslint-config-next": "15.4.6",
     "rollup": "^4.46.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-svg": "^2.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"

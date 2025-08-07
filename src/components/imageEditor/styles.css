@@ -1,0 +1,437 @@
+/* Image Editor Styles */
+.image-editor-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #5e3e31;
+}
+
+.image-editor-header {
+  background-color: #725143;
+  padding: 1rem 1.5rem;
+  border-radius: 24px;
+  margin: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.image-editor-header-left {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.image-editor-header-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-editor-title {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.image-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.image-editor-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.image-editor-button-primary {
+  background-color: #ff7000;
+  color: white;
+}
+
+.image-editor-button-primary:hover {
+  background-color: #e65a00;
+}
+
+.image-editor-button-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.image-editor-button-secondary:hover {
+  background-color: #4b5563;
+}
+
+.image-editor-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toolbar Styles */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  transition: colors 0.2s;
+  color: white;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.toolbar-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.toolbar-button.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 2rem;
+  background-color: #d1d5db;
+  margin: 0 0.5rem;
+}
+
+/* Color Palette */
+.color-palette {
+  padding: 0.75rem;
+  background-color: #553529;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.color-palette-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 12rem;
+}
+
+.color-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  border: 2px solid;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.color-button.active {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.color-button:not(.active) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Width Slider */
+.width-slider {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  min-width: 24rem;
+}
+
+.width-slider-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.width-slider-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.width-slider-input {
+  flex: 1;
+}
+
+.width-slider-value {
+  font-size: 0.875rem;
+  color: white;
+  width: 2rem;
+}
+
+/* Canvas Container */
+.canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #5e3e31;
+  padding: 1rem;
+}
+
+.canvas-wrapper {
+  background: transparent;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  max-width: calc(100vw - 200px);
+  max-height: calc(100vh - 200px);
+}
+
+.canvas-element {
+  display: block;
+  border-radius: 24px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Crop Mode */
+.crop-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #fef3c7;
+  border-bottom: 1px solid #f59e0b;
+}
+
+.crop-mode-text {
+  color: #92400e;
+  font-weight: 500;
+}
+
+.crop-mode-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.crop-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: colors 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.crop-button-apply {
+  background-color: #10b981;
+  color: white;
+}
+
+.crop-button-apply:hover {
+  background-color: #059669;
+}
+
+.crop-button-cancel {
+  background-color: #6b7280;
+  color: white;
+}
+
+.crop-button-cancel:hover {
+  background-color: #4b5563;
+}
+
+/* Utility Classes */
+.text-white {
+  color: white;
+}
+
+.bg-transparent {
+  background-color: transparent;
+}
+
+.rounded-3xl {
+  border-radius: 24px;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.m-2 {
+  margin: 0.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-screen {
+  height: 100vh;
+}
+
+.min-w-96 {
+  min-width: 24rem;
+}
+
+.max-w-48 {
+  max-width: 12rem;
+}
+
+.w-10 {
+  width: 2.5rem;
+}
+
+.h-10 {
+  height: 2.5rem;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.h-6 {
+  height: 1.5rem;
+}
+
+.w-px {
+  width: 1px;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.transition-colors {
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.transition-all {
+  transition: all 0.2s;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.border-2 {
+  border-width: 2px;
+}
+
+.border-white\/10 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.border-white\/20 {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.scale-110 {
+  transform: scale(1.1);
+}
+
+/* HeroUI Overrides */
+.heroui-slider {
+  flex: 1;
+}
+
+.heroui-slider-track {
+  background-color: #d1d5db;
+}
+
+.heroui-slider-filler {
+  background-color: #ff7000;
+}
+
+.heroui-slider-thumb {
+  background-color: #ff7000;
+  border-color: #ff7000;
+}

@@ -4,6 +4,7 @@ const typescript = require("@rollup/plugin-typescript");
 const peerDepsExternal = require("rollup-plugin-peer-deps-external");
 const terser = require("@rollup/plugin-terser");
 const svg = require("rollup-plugin-svg");
+const postcss = require("rollup-plugin-postcss");
 const path = require("path");
 const { babel } = require("@rollup/plugin-babel");
 
@@ -31,6 +32,11 @@ module.exports = {
     }),
     svg({
       base64: true,
+    }),
+    postcss({
+      extract: true,
+      modules: false,
+      use: ["sass"],
     }),
     commonjs({
       include: "node_modules/**",

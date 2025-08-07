@@ -12,6 +12,9 @@ import { useUndoRedo } from "./hooks/useUndoRedo";
 import { Toolbar } from "./Toolbar";
 import type { CustomFabricObject, CustomFabricImage, CustomFabricPath, FabricSelectionEvent } from "./types";
 
+// Import styles
+import "./styles.css";
+
 export interface IImageEditorProps {
   imageUrl: string;
   onSave: (imageBlob: Blob) => void;
@@ -398,15 +401,15 @@ const ImageEditor = (props: IImageEditorProps) => {
   }, [canvas]);
 
   return (
-    <div className="w-full h-screen flex flex-col bg-[#5E3E31]">
-      {/* header */}
-      <div className="bg-[#725143] px-6 py-4 rounded-3xl m-2 flex items-center justify-between">
-        <div className="flex gap-2 items-center">
-          <button className="cursor-pointer flex items-center justify-center" onClick={handleCancel}>
+    <div className="image-editor-container">
+      <div className="image-editor-header">
+        <div className="image-editor-header-left">
+          <button className="image-editor-header-button" onClick={handleCancel}>
             <Icon name="arrow-left" className="text-white" />
           </button>
-          <span className="text-white text-sm font-semibold">Image Edit Mode</span>
+          <span className="image-editor-title">Image Edit Mode</span>
         </div>
+
         <Toolbar
           onAddShape={handleAddShape}
           onCropStart={handleCropStart}
@@ -427,7 +430,8 @@ const ImageEditor = (props: IImageEditorProps) => {
           canUndo={canUndo}
           canRedo={canRedo}
         />
-        <div className="flex items-center gap-3">
+
+        <div className="image-editor-actions">
           <Button onPress={handleCancel} color="default">
             Cancel
           </Button>
@@ -438,19 +442,13 @@ const ImageEditor = (props: IImageEditorProps) => {
       </div>
 
       {isCropping && (
-        <div className="flex items-center gap-3 p-4 bg-orange-50 border-b border-orange-200">
-          <span className="text-orange-800 font-medium">Crop Mode: Drag and resize the selection area</span>
-          <div className="flex gap-2 ml-auto">
-            <button
-              onClick={handleCropApply}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
+        <div className="crop-mode">
+          <span className="crop-mode-text">Crop Mode: Drag and resize the selection area</span>
+          <div className="crop-mode-actions">
+            <button onClick={handleCropApply} className="crop-button crop-button-apply">
               Apply Crop
             </button>
-            <button
-              onClick={handleCropCancel}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
+            <button onClick={handleCropCancel} className="crop-button crop-button-cancel">
               Cancel
             </button>
           </div>

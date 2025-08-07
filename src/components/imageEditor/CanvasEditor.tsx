@@ -84,24 +84,9 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
   }, [canvas, calculateCanvasSize]);
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-[#5E3E31] p-4">
-      <div
-        className="bg-transparent rounded-3xl shadow-lg overflow-hidden"
-        style={{
-          borderRadius: "24px",
-          maxWidth: "calc(100vw - 200px)",
-          maxHeight: "calc(100vh - 200px)",
-        }}
-      >
-        <canvas
-          ref={canvasRef}
-          className="block"
-          style={{
-            borderRadius: "24px",
-            width: "100%",
-            height: "100%",
-          }}
-        />
+    <div className="canvas-container">
+      <div className="canvas-wrapper">
+        <canvas ref={canvasRef} className="canvas-element" />
       </div>
     </div>
   );
