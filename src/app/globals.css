@@ -1,26 +1,173 @@
 @import "tailwindcss";
+@plugin './hero.ts';
+
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant light (&:is(.light *));
+
+@font-face {
+  font-family: "Roca";
+  src: url("/assets/fonts/roca.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Recoleta";
+  src: url("/assets/fonts/recoleta-bold.otf") format("opentype");
+  font-weight: 100 900; /* Multiple weights için range */
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Primary Colors */
+  --primary-red: #e94a3d;
+  --primary-blue: #321ffd;
+  --primary-green: #45a249;
+  --primary-orange: #ff7000;
+  --primary-purple: #4c32eb;
+  --primary-brown: #542500;
+  --peach-light: #ffe6d2;
+  --onboarding-light-orange: #fff0e4;
+  --hover-state: #f3f4f6;
+  --placeholder-state: #9d9d9d;
+  /* // gray true */
+  --gray-true-25: #fcfcfc;
+  --gray-true-50: #fafafa;
+  --gray-true-100: #f5f5f5;
+  --gray-true-200: #e5e5e5;
+  --gray-true-300: #d6d6d6;
+  --gray-true-400: #a3a3a3;
+  --gray-true-500: #737373;
+  --gray-true-600: #525252;
+  --gray-true-700: #424242;
+  --gray-true-800: #292929;
+  --gray-true-900: #141414;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Primary Colors */
+  --color-primary-red: var(--primary-red);
+  --color-primary-blue: var(--primary-blue);
+  --color-primary-green: var(--primary-green);
+  --color-primary-orange: var(--primary-orange);
+  --color-primary-purple: var(--primary-purple);
+  --color-primary-brown: var(--primary-brown);
+  --color-peach-light: var(--peach-light);
+  --color-hover-state: var(--hover-state);
+  --color-onboarding-light-orange: var(--onboarding-light-orange);
+  --color-placeholder-state: var(--placeholder-state);
+  --color-gray-true-25: var(--gray-true-25);
+  --color-gray-true-50: var(--gray-true-50);
+  --color-gray-true-100: var(--gray-true-100);
+  --color-gray-true-200: var(--gray-true-200);
+  --color-gray-true-300: var(--gray-true-300);
+  --color-gray-true-400: var(--gray-true-400);
+  --color-gray-true-500: var(--gray-true-500);
+  --color-gray-true-600: var(--gray-true-600);
+  --color-gray-true-700: var(--gray-true-700);
+  --color-gray-true-800: var(--gray-true-800);
+  --color-gray-true-900: var(--gray-true-900);
+
+  --font-inter: "Inter", sans-serif;
+  --font-roca: "Roca", sans-serif;
+  --font-recoleta: "Recoleta", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    /* Primary Colors */
+    --primary-red: #e94a3d;
+    --primary-blue: #321ffd;
+    --primary-green: #45a249;
+    --primary-orange: #ff7000;
+    --primary-purple: #4c32eb;
+    --primary-brown: #542500;
+    --peach-light: #ffe6d2;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+html {
+  overscroll-behavior: none;
+}
+
+.font-inter {
+  font-family: var(--font-inter);
+}
+
+.font-roca {
+  font-family: var(--font-roca);
+}
+
+.font-recoleta {
+  font-family: var(--font-recoleta);
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  /* Chrome and Safari */
+  display: none !important;
+}
+
+.hidden-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important;
+}
+
+/* Password Manager ve Auto-fill stil düzeltmeleri */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+input[data-com-onepassword-filled],
+input[data-dashlane-filled],
+input[data-lastpass-filled],
+input[data-bitwarden-filled],
+input[data-keeper-filled] {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: black !important;
+  background-color: white !important;
+  box-shadow: 0 0 0 30px white inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autofill stilleri */
+input:-moz-autofill {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* Genel attribute selector - diğer password manager'lar için */
+input[data-com-onepassword-filled="true"],
+input[data-dashlane-filled="true"],
+input[data-lastpass-filled="true"],
+input[data-bitwarden-filled="true"] {
+  background-color: white !important;
+  box-shadow: none !important;
+}
+
+/* Tawk.to widget control */
+/* Hide Tawk.to widget by default using the correct ID */
+#tawk-bubble-container {
+  display: none !important;
+}
+
+/* Show widget when body has the show class */
+body.show-tawk-widget #tawk-bubble-container {
+  display: block !important;
 }

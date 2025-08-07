@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# React Image Editor
 
-## Getting Started
+A powerful React image editor component built with Fabric.js, featuring blur, crop, shapes, and undo/redo functionality.
 
-First, run the development server:
+## Features
+
+- 🎨 **Image Editing**: Load and edit images with various tools
+- 🔍 **Blur Tool**: Add blur effects to specific areas
+- ✂️ **Crop Tool**: Crop images to desired dimensions
+- 🔷 **Shape Tools**: Add rectangles and circles
+- ↩️ **Undo/Redo**: Full undo/redo functionality
+- 🎯 **Drawing Mode**: Free-hand drawing capabilities
+- 🎨 **Color Picker**: Customizable colors for shapes and drawings
+- 📏 **Stroke Width**: Adjustable stroke width for shapes and drawings
+
+## Installation
 
 ```bash
-npm run dev
+npm install @ozdemircibaris/react-image-editor
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn add @ozdemircibaris/react-image-editor
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```jsx
+import React, { useState } from "react";
+import { ImageEditor } from "@ozdemircibaris/react-image-editor";
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+function App() {
+  const [imageUrl, setImageUrl] = useState("");
 
-## Learn More
+  const handleSave = (imageBlob) => {
+    // Handle the saved image blob
+    const url = URL.createObjectURL(imageBlob);
+    console.log("Saved image URL:", url);
+  };
 
-To learn more about Next.js, take a look at the following resources:
+  const handleCancel = () => {
+    console.log("Editing cancelled");
+  };
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  return <div>{imageUrl && <ImageEditor imageUrl={imageUrl} onSave={handleSave} onCancel={handleCancel} />}</div>;
+}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+export default App;
+```
 
-## Deploy on Vercel
+## Props
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Prop       | Type                        | Required | Description                        |
+| ---------- | --------------------------- | -------- | ---------------------------------- |
+| `imageUrl` | `string`                    | Yes      | URL of the image to edit           |
+| `onSave`   | `(imageBlob: Blob) => void` | Yes      | Callback when image is saved       |
+| `onCancel` | `() => void`                | Yes      | Callback when editing is cancelled |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API
+
+### ImageEditor Component
+
+The main component that provides the full image editing experience.
+
+### Hooks
+
+#### useBlurHandlers
+
+```jsx
+import { useBlurHandlers } from "@ozdemircibaris/react-image-editor";
+
+const { activeBlurRects, setActiveBlurRects, handleAddBlur } = useBlurHandlers(
+  canvas,
+  originalImage,
+  isDrawing,
+  setIsSelectMode,
+);
+```
+
+#### useCropHandlers
+
+```jsx
+import { useCropHandlers } from "@ozdemircibaris/react-image-editor";
+
+const { isCropping, setIsCropping, handleCropStart, handleCropApply, handleCropCancel } = useCropHandlers(
+  canvas,
+  originalImage,
+  isDrawing,
+  activeBlurRects,
+  setActiveBlurRects,
+  setIsSelectMode,
+  setOriginalImage,
+);
+```
+
+#### useShapeHandlers
+
+```jsx
+import { useShapeHandlers } from "@ozdemircibaris/react-image-editor";
+
+const { handleAddShape } = useShapeHandlers(
+  canvas,
+  isCropping,
+  isDrawing,
+  currentColor,
+  currentStrokeWidth,
+  setIsSelectMode,
+);
+```
+
+#### useUndoRedo
+
+```jsx
+import { useUndoRedo } from "@ozdemircibaris/react-image-editor";
+
+const { saveState, undo, redo, initializeHistory, canUndo, canRedo } = useUndoRedo(
+  canvas,
+  50, // max history size
+  updateOriginalImageReference,
+);
+```
+
+## Types
+
+```typescript
+interface IImageEditorProps {
+  imageUrl: string;
+  onSave: (imageBlob: Blob) => void;
+  onCancel: () => void;
+}
+
+interface CustomFabricObject extends fabric.Object {
+  id?: string;
+  isDrawing?: boolean;
+  isBlurPatch?: boolean;
+  blurRectId?: string;
+  stroke?: string;
+  strokeWidth?: number;
+}
+```
+
+## Dependencies
+
+This package has the following peer dependencies:
+
+- React >= 16.8.0
+- React DOM >= 16.8.0
+
+And the following dependencies:
+
+- Fabric.js
+- HeroUI React
+- Radix UI Popover
+
+## Development
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start development server: `npm run dev`
+4. Build the library: `npm run build:lib`
+
+## License
+
+MIT

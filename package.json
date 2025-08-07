@@ -1,27 +1,72 @@
 {
-  "name": "image-editor",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@ozdemircibaris/react-image-editor",
+  "private": false,
+  "version": "1.0.0",
+  "description": "A powerful React image editor component with blur, crop, shapes, and undo/redo functionality",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:lib": "rollup -c",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "keywords": [
+    "react",
+    "image-editor",
+    "fabric.js",
+    "canvas",
+    "blur",
+    "crop",
+    "shapes",
+    "undo-redo"
+  ],
+  "author": "Özdemir Cibaris",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "next": "15.4.6"
+    "@heroui/react": "^2.8.0-beta.7",
+    "@heroui/system": "^2.4.18-beta.1",
+    "@heroui/theme": "^2.4.18-beta.1",
+    "@radix-ui/react-popover": "^1.1.14",
+    "fabric": "^5.3.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@babel/preset-react": "^7.27.1",
+    "@eslint/eslintrc": "^3",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@tailwindcss/postcss": "^4",
+    "@types/fabric": "^5.3.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "@eslint/eslintrc": "^3"
-  }
+    "rollup": "^4.46.2",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ozdemircibaris/react-image-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ozdemircibaris/react-image-editor/issues"
+  },
+  "homepage": "https://github.com/ozdemircibaris/react-image-editor#readme"
 }
