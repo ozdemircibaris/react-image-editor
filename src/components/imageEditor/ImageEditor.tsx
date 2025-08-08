@@ -140,8 +140,8 @@ const ImageEditor = (props: IImageEditorProps) => {
       const scaleY = scale;
 
       img.set({
-        originX: "center",
-        originY: "center",
+        originX: "left",
+        originY: "top",
         scaleX: scaleX,
         scaleY: scaleY,
         selectable: false,
@@ -159,11 +159,21 @@ const ImageEditor = (props: IImageEditorProps) => {
       // Set ID separately to avoid TypeScript issues
       (img as CustomFabricImage).id = "originalImage";
 
-      // Reset viewport, add and center precisely using Fabric helper
+      // Reset viewport, add and center precisely
       canvas.setZoom(1);
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       canvas.add(img);
-      canvas.centerObject(img);
+
+      // Manually center the image
+      const imgScaledWidth = img.getScaledWidth();
+      const imgScaledHeight = img.getScaledHeight();
+      const centerX = (canvasWidth - imgScaledWidth) / 2;
+      const centerY = (canvasHeight - imgScaledHeight) / 2;
+      img.set({
+        left: centerX,
+        top: centerY,
+      });
+
       img.setCoords();
       canvas.renderAll();
 

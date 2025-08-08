@@ -30,66 +30,76 @@ export const useBlurHandlers = (
         }
       });
 
-      // Get blur area coordinates - use getBoundingRect for accurate coordinates
-      const rectBounds = blurRect.getBoundingRect();
-      const left = rectBounds.left;
-      const top = rectBounds.top;
-      const width = rectBounds.width;
-      const height = rectBounds.height;
+      // Get the blur rect's actual position in canvas space
+      const rectLeft = blurRect.left || 0;
+      const rectTop = blurRect.top || 0;
+      const rectWidth = blurRect.getScaledWidth();
+      const rectHeight = blurRect.getScaledHeight();
 
-      // Temporarily hide the blur rect
-      blurRect.set({ visible: false });
-      canvas.renderAll();
+      // Image bounds in canvas-space
+      const imgScaleX = originalImage.scaleX || 1;
+      const imgScaleY = originalImage.scaleY || 1;
+      const imgScaledW = (originalImage.width || 0) * imgScaleX;
+      const imgScaledH = (originalImage.height || 0) * imgScaleY;
+      const imgCenter = new fabric.Point(originalImage.left || 0, originalImage.top || 0);
+      const imgTL = new fabric.Point(imgCenter.x - imgScaledW / 2, imgCenter.y - imgScaledH / 2);
+      const imgBR = new fabric.Point(imgTL.x + imgScaledW, imgTL.y + imgScaledH);
 
-      // Use requestAnimationFrame for smooth update
+      // Calculate intersection between blur rect and image (canvas-space)
+      const rectRight = rectLeft + rectWidth;
+      const rectBottom = rectTop + rectHeight;
+
+      const interLeft = Math.max(imgTL.x, rectLeft);
+      const interTop = Math.max(imgTL.y, rectTop);
+      const interRight = Math.min(imgBR.x, rectRight);
+      const interBottom = Math.min(imgBR.y, rectBottom);
+      const interW = Math.max(0, interRight - interLeft);
+      const interH = Math.max(0, interBottom - interTop);
+
+      if (interW <= 0 || interH <= 0) {
+        // Nothing to blur (outside image)
+        blurRect.set({ visible: true });
+        canvas.requestRenderAll();
+        customCanvas.isUpdatingBlur = false;
+        return;
+      }
+
+      // Convert intersection to original image pixel coordinates
+      const pxX = Math.round((interLeft - imgTL.x) / imgScaleX);
+      const pxY = Math.round((interTop - imgTL.y) / imgScaleY);
+      const pxW = Math.round(interW / imgScaleX);
+      const pxH = Math.round(interH / imgScaleY);
+
+      const imgEl = originalImage.getElement() as HTMLImageElement;
+
       requestAnimationFrame(() => {
-        // Create temporary canvas to capture the area
         const tempCanvas = document.createElement("canvas");
         const tempCtx = tempCanvas.getContext("2d");
         if (!tempCtx) return;
+        tempCanvas.width = Math.max(1, pxW);
+        tempCanvas.height = Math.max(1, pxH);
 
-        tempCanvas.width = width;
-        tempCanvas.height = height;
+        // Draw from the original image element at pixel precision
+        tempCtx.drawImage(imgEl, pxX, pxY, pxW, pxH, 0, 0, pxW, pxH);
 
-        // Get main canvas element
-        const mainCanvasEl = canvas.getElement();
-
-        // Calculate proper coordinates considering device pixel ratio
-        const canvasRect = mainCanvasEl.getBoundingClientRect();
-        const scaleX = mainCanvasEl.width / canvasRect.width;
-        const scaleY = mainCanvasEl.height / canvasRect.height;
-
-        // Crop the correct area
-        tempCtx.drawImage(
-          mainCanvasEl,
-          left * scaleX,
-          top * scaleY,
-          width * scaleX,
-          height * scaleY,
-          0,
-          0,
-          width,
-          height,
-        );
-
-        // Apply blur effect on a separate canvas
+        // Blur on separate canvas
         const blurCanvas = document.createElement("canvas");
         const blurCtx = blurCanvas.getContext("2d");
         if (!blurCtx) return;
-
-        blurCanvas.width = width;
-        blurCanvas.height = height;
-
-        // Apply strong blur filter
-        blurCtx.filter = "blur(12px)";
+        blurCanvas.width = pxW;
+        blurCanvas.height = pxH;
+        blurCtx.filter = "blur(20px)";
         blurCtx.drawImage(tempCanvas, 0, 0);
 
-        // Create fabric image from blurred canvas
         fabric.Image.fromURL(blurCanvas.toDataURL(), (blurImg: fabric.Image) => {
           const customBlurImg = blurImg as CustomFabricObject;
           customBlurImg.set({
-            left: left,
-            top: top,
+            left: interLeft,
+            top: interTop,
+            originX: "left",
+            originY: "top",
+            scaleX: imgScaleX,
+            scaleY: imgScaleY,
             selectable: false,
             evented: false,
             isBlurPatch: true,
@@ -98,13 +108,9 @@ export const useBlurHandlers = (
           });
 
           canvas.add(blurImg);
-
-          // Make blur rect visible again and bring to front
           blurRect.set({ visible: true });
           canvas.bringToFront(blurRect);
-          canvas.renderAll();
-
-          // Reset update flag
+          canvas.requestRenderAll();
           customCanvas.isUpdatingBlur = false;
         });
       });
@@ -119,19 +125,34 @@ export const useBlurHandlers = (
 
     const canvasWidth = canvas.getWidth();
     const canvasHeight = canvas.getHeight();
-    const imgBounds = originalImage.getBoundingRect();
+
+    // Compute image bounds in canvas space (independent of viewport)
+    const imgScaledW = originalImage.getScaledWidth();
+    const imgScaledH = originalImage.getScaledHeight();
+    const imgBounds = {
+      left: (originalImage.left || 0) - imgScaledW / 2,
+      top: (originalImage.top || 0) - imgScaledH / 2,
+      width: imgScaledW,
+      height: imgScaledH,
+    };
+
+    // Calculate the current viewport center in canvas space
+    const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    const inverted = fabric.util.invertTransform(vpt as any);
+    const screenCenter = new fabric.Point(canvasWidth / 2, canvasHeight / 2);
+    const viewportCenter = fabric.util.transformPoint(screenCenter, inverted);
 
     // Create blur rectangle
     const blurWidth = 150;
     const blurHeight = 100;
-    const blurX = Math.max(
-      imgBounds.left + 20,
-      Math.min(canvasWidth / 2 - blurWidth / 2, imgBounds.left + imgBounds.width - blurWidth - 20),
-    );
-    const blurY = Math.max(
-      imgBounds.top + 20,
-      Math.min(canvasHeight / 2 - blurHeight / 2, imgBounds.top + imgBounds.height - blurHeight - 20),
-    );
+
+    // Position blur rectangle at viewport center, clamped to image bounds
+    let blurX = viewportCenter.x - blurWidth / 2;
+    let blurY = viewportCenter.y - blurHeight / 2;
+
+    // Clamp to image bounds with some margin
+    blurX = Math.max(imgBounds.left + 20, Math.min(blurX, imgBounds.left + imgBounds.width - blurWidth - 20));
+    blurY = Math.max(imgBounds.top + 20, Math.min(blurY, imgBounds.top + imgBounds.height - blurHeight - 20));
 
     const blurRect = new fabric.Rect({
       id: Date.now(), // Unique ID for this blur rect
@@ -139,23 +160,29 @@ export const useBlurHandlers = (
       top: blurY,
       width: blurWidth,
       height: blurHeight,
+      originX: "left",
+      originY: "top",
       fill: "transparent",
       stroke: "#8b5cf6",
       strokeWidth: 2,
+      strokeUniform: true as any,
       strokeDashArray: [5, 5],
-      opacity: 0.8,
+      opacity: 0.9,
       cornerColor: "#8b5cf6",
-      cornerSize: 8,
+      cornerSize: 10,
       transparentCorners: false,
       hasControls: true,
       hasBorders: true,
       lockRotation: true,
       lockSkewingX: true,
       lockSkewingY: true,
+      lockScalingFlip: true as any,
+      centeredScaling: false as any,
+      objectCaching: false as any,
       selectable: true,
       evented: true,
       borderColor: "#8b5cf6",
-      cornerStyle: "circle",
+      cornerStyle: "rect" as any,
     } as any);
 
     // Initial blur effect

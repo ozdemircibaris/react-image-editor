@@ -36,11 +36,11 @@ export const useCropHandlers = (
     // Recompute image bounds independent of current viewport
     const canvasWidth = canvas.getWidth();
     const canvasHeight = canvas.getHeight();
-    const imgCenterX = originalImage.left || 0;
-    const imgCenterY = originalImage.top || 0;
+    const imgLeft = originalImage.left || 0;
+    const imgTop = originalImage.top || 0;
     const imgBounds = {
-      left: imgCenterX - originalImage.getScaledWidth() / 2,
-      top: imgCenterY - originalImage.getScaledHeight() / 2,
+      left: imgLeft,
+      top: imgTop,
       width: originalImage.getScaledWidth(),
       height: originalImage.getScaledHeight(),
     };
@@ -159,10 +159,11 @@ export const useCropHandlers = (
     const brCanvas = fabric.util.transformPoint(brScreen, inverted);
 
     // Image top-left in canvas space
-    const imgCenter = new fabric.Point(originalImage.left || 0, originalImage.top || 0);
+    const imgLeft = originalImage.left || 0;
+    const imgTop = originalImage.top || 0;
     const imgScaledW = (originalImage.width || 0) * (originalImage.scaleX || 1);
     const imgScaledH = (originalImage.height || 0) * (originalImage.scaleY || 1);
-    const imgTL = new fabric.Point(imgCenter.x - imgScaledW / 2, imgCenter.y - imgScaledH / 2);
+    const imgTL = new fabric.Point(imgLeft, imgTop);
 
     // Compute crop rect in image pixel space
     const scaleX = originalImage.scaleX || 1;
@@ -259,8 +260,8 @@ export const useCropHandlers = (
   const attachCropListeners = useCallback(() => {
     if (!canvas || !cropRect || !originalImage) return;
     const imgBounds = {
-      left: (originalImage.left || 0) - originalImage.getScaledWidth() / 2,
-      top: (originalImage.top || 0) - originalImage.getScaledHeight() / 2,
+      left: originalImage.left || 0,
+      top: originalImage.top || 0,
       width: originalImage.getScaledWidth(),
       height: originalImage.getScaledHeight(),
     };
