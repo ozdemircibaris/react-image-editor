@@ -4,7 +4,6 @@ const typescript = require("@rollup/plugin-typescript");
 const peerDepsExternal = require("rollup-plugin-peer-deps-external");
 const terser = require("@rollup/plugin-terser");
 const svg = require("rollup-plugin-svg");
-const postcss = require("rollup-plugin-postcss");
 const path = require("path");
 const { babel } = require("@rollup/plugin-babel");
 
@@ -33,11 +32,6 @@ module.exports = {
     svg({
       base64: true,
     }),
-    postcss({
-      extract: true,
-      modules: false,
-      use: ["sass"],
-    }),
     commonjs({
       include: "node_modules/**",
     }),
@@ -45,7 +39,7 @@ module.exports = {
       tsconfig: "./tsconfig.json",
       declaration: true,
       declarationDir: "./dist",
-      exclude: ["src/app/**", "**/*.test.ts", "**/*.test.tsx"],
+      exclude: ["**/*.test.ts", "**/*.test.tsx"],
       outDir: "./dist",
     }),
     babel({
@@ -55,14 +49,5 @@ module.exports = {
     }),
     terser(),
   ],
-  external: [
-    "react",
-    "react-dom",
-    "fabric",
-    "next",
-    "@heroui/react",
-    "@heroui/system",
-    "@heroui/theme",
-    "@radix-ui/react-popover",
-  ],
+  external: ["react", "react-dom", "fabric", "next", "@radix-ui/react-popover"],
 };

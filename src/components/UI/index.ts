@@ -1,3 +1,4 @@
 export { Icon } from "./icon";
 export { Popover } from "./popover";
-export { Button } from "@heroui/react";
+export { Button } from "./Button";
+export { Slider } from "./Slider";

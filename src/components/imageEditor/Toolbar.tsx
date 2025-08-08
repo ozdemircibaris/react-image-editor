@@ -1,7 +1,6 @@
-import { Slider } from "@heroui/react";
 import React from "react";
 
-import { Icon, Popover } from "../UI";
+import { Icon, Popover, Slider } from "../UI";
 import { IconNamesType } from "../../constants/icons";
 
 // Shared color palette - can be exported and used by other components
@@ -90,10 +89,10 @@ const WidthSlider: React.FC<WidthSliderProps> = ({ currentWidth, onWidthChange }
         <Slider
           size="sm"
           step={1}
-          minValue={1}
-          maxValue={20}
+          min={1}
+          max={20}
           value={currentWidth}
-          onChange={(value) => onWidthChange(value as number)}
+          onChange={onWidthChange}
           className="width-slider-input"
         />
         <span className="width-slider-value">{currentWidth}px</span>
@@ -149,7 +148,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   canRedo = false,
 }) => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="toolbar">
       {hasImage && (
         <>
           <ToolbarButton
@@ -159,7 +158,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             isActive={isSelectMode}
             disabled={false}
           />
-
           <ToolbarButton
             iconName="pencil"
             onClick={onToggleDraw}
@@ -167,9 +165,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             isActive={isDrawing}
             disabled={isCropping}
           />
-
           <ToolbarButton iconName="crop" onClick={onCropStart} title="Crop" disabled={isCropping || isDrawing} />
-
           <ToolbarButton
             iconName="blur"
             onClick={onAddBlur}
@@ -177,7 +173,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             isActive={isBlurActive}
             disabled={isCropping || isDrawing}
           />
-
           <ToolbarButton
             iconName="square"
             onClick={() => onAddShape("rectangle")}
@@ -185,7 +180,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             isActive={activeShape === "rectangle"}
             disabled={isCropping || isDrawing}
           />
-
           <ToolbarButton
             iconName="circle"
             onClick={() => onAddShape("circle")}
@@ -194,46 +188,60 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             disabled={isCropping || isDrawing}
           />
 
-          <div className="w-px h-8 bg-gray-300 mx-2" />
+          <div className="toolbar-divider" />
 
-          {/* Color Palette - always visible but disabled when no object selected and not drawing */}
           <Popover
             trigger={
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors text-white hover:bg-white/15 cursor-pointer ${
-                  !selectedObject && !isDrawing ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <div className="w-6 h-6 rounded border-2 border-white/20" style={{ backgroundColor: currentColor }} />
+              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"}`}>
+                <div className="w-6 h-6 rounded border-2 border-gray-700" style={{ backgroundColor: currentColor }} />
               </div>
             }
             content={<ColorPalette currentColor={currentColor} onColorChange={onColorChange || (() => {})} />}
-            contentClassName="!bg-[#553529]"
+            contentClassName="glass-effect-strong"
             placement="bottom"
           />
 
-          {/* Width Slider - always visible but disabled when no object selected and not drawing */}
           <Popover
             trigger={
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors text-white hover:bg-white/15 cursor-pointer ${
-                  !selectedObject && !isDrawing ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                <div className="w-6 h-1 bg-white rounded" />
+              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"}`}>
+                {/* Custom inline stroke width indicator */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div
+                    style={{
+                      width: 18,
+                      height: 2,
+                      background: "#9ca3af",
+                      borderRadius: 9999,
+                      position: "relative",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: "50%",
+                        transform: "translate(0,-50%)",
+                        width: Math.max(2, Math.min(12, currentStrokeWidth)) + 2,
+                        height: Math.max(2, Math.min(12, currentStrokeWidth)),
+                        borderRadius: 9999,
+                        background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                        boxShadow: "0 0 0 1px rgba(0,0,0,0.4)",
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             }
             content={
               <WidthSlider currentWidth={currentStrokeWidth} onWidthChange={onStrokeWidthChange || (() => {})} />
             }
             placement="bottom"
-            contentClassName="!bg-[#553529]"
+            contentClassName="glass-effect-strong"
           />
 
-          <div className="w-px h-8 bg-gray-300 mx-2" />
+          <div className="toolbar-divider" />
 
           <ToolbarButton iconName="undo" onClick={onUndo || (() => {})} title="Undo (Ctrl+Z)" disabled={!canUndo} />
-
           <ToolbarButton iconName="redo" onClick={onRedo || (() => {})} title="Redo (Ctrl+Y)" disabled={!canRedo} />
         </>
       )}

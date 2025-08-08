@@ -1,8 +1,7 @@
 import { fabric } from "fabric";
-import React, { useEffect, useCallback, useState } from "react";
-import { Button } from "@heroui/react";
+import { useEffect, useCallback, useState } from "react";
 
-import { Icon } from "../UI";
+import { Icon, Button } from "../UI";
 
 import { CanvasEditor } from "./CanvasEditor";
 import { useBlurHandlers } from "./hooks/useBlurHandlers";
@@ -12,8 +11,8 @@ import { useUndoRedo } from "./hooks/useUndoRedo";
 import { Toolbar } from "./Toolbar";
 import type { CustomFabricObject, CustomFabricImage, CustomFabricPath, FabricSelectionEvent } from "./types";
 
-// Import styles
-import "./styles.css";
+// Import and inject styles
+import { injectStyles } from "./styles";
 
 export interface IImageEditorProps {
   imageUrl: string;
@@ -400,16 +399,16 @@ const ImageEditor = (props: IImageEditorProps) => {
     };
   }, [canvas]);
 
-  return (
-    <div className="image-editor-container">
-      <div className="image-editor-header">
-        <div className="image-editor-header-left">
-          <button className="image-editor-header-button" onClick={handleCancel}>
-            <Icon name="arrow-left" className="text-white" />
-          </button>
-          <span className="image-editor-title">Image Edit Mode</span>
-        </div>
+  // Inject styles on mount
+  useEffect(() => {
+    injectStyles();
+  }, []);
 
+  // Handle canvas ready
+
+  return (
+    <div className="image-editor-container animate-fade-in">
+      <div className="image-editor-header">
         <Toolbar
           onAddShape={handleAddShape}
           onCropStart={handleCropStart}
@@ -432,23 +431,25 @@ const ImageEditor = (props: IImageEditorProps) => {
         />
 
         <div className="image-editor-actions">
-          <Button onPress={handleCancel} color="default">
-            Cancel
-          </Button>
-          <Button onPress={handleSave} disabled={!hasImage} color="primary">
+          <Button
+            onPress={handleSave}
+            disabled={!hasImage}
+            color="primary"
+            className="image-editor-button image-editor-button-primary hover-lift"
+          >
             Save
           </Button>
         </div>
       </div>
 
       {isCropping && (
-        <div className="crop-mode">
+        <div className="crop-mode animate-fade-in">
           <span className="crop-mode-text">Crop Mode: Drag and resize the selection area</span>
           <div className="crop-mode-actions">
-            <button onClick={handleCropApply} className="crop-button crop-button-apply">
+            <button onClick={handleCropApply} className="crop-button crop-button-apply hover-lift">
               Apply Crop
             </button>
-            <button onClick={handleCropCancel} className="crop-button crop-button-cancel">
+            <button onClick={handleCropCancel} className="crop-button crop-button-cancel hover-lift">
               Cancel
             </button>
           </div>
