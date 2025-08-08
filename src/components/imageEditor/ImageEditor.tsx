@@ -133,13 +133,13 @@ const ImageEditor = (props: IImageEditorProps) => {
       const imgWidth = (imgElement as HTMLImageElement).width;
       const imgHeight = (imgElement as HTMLImageElement).height;
 
-      // Make image same size as canvas with 24px border radius
-      const scaleX = canvasWidth / imgWidth;
-      const scaleY = canvasHeight / imgHeight;
+      // FIT MODE (contain): scale uniformly to fit entirely within canvas with small margin
+      const margin = 24; // px visual breathing room
+      const scale = Math.min((canvasWidth - margin * 2) / imgWidth, (canvasHeight - margin * 2) / imgHeight, 1);
+      const scaleX = scale;
+      const scaleY = scale;
 
       img.set({
-        left: canvasWidth / 2,
-        top: canvasHeight / 2,
         originX: "center",
         originY: "center",
         scaleX: scaleX,
@@ -159,7 +159,12 @@ const ImageEditor = (props: IImageEditorProps) => {
       // Set ID separately to avoid TypeScript issues
       (img as CustomFabricImage).id = "originalImage";
 
+      // Reset viewport, add and center precisely using Fabric helper
+      canvas.setZoom(1);
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       canvas.add(img);
+      canvas.centerObject(img);
+      img.setCoords();
       canvas.renderAll();
 
       setHasImage(true);
@@ -290,22 +295,55 @@ const ImageEditor = (props: IImageEditorProps) => {
   const handleSave = useCallback(() => {
     if (!canvas) return;
 
-    // Convert canvas to data URL first, then to blob
-    const dataURL = canvas.toDataURL({
-      format: "png",
-      quality: 1,
-    });
+    try {
+      // If we have the original image, export exactly its bounds scaled to its natural resolution
+      if (originalImage) {
+        const imgEl = originalImage.getElement() as HTMLImageElement;
+        const naturalWidth = (imgEl as any).naturalWidth || imgEl.width || originalImage.width || 0;
+        const naturalHeight = (imgEl as any).naturalHeight || imgEl.height || originalImage.height || 0;
 
-    // Convert data URL to blob
-    fetch(dataURL)
-      .then((res) => res.blob())
-      .then((blob) => {
-        onSave(blob);
-      })
-      .catch((error) => {
-        console.error("Error converting canvas to blob:", error);
-      });
-  }, [canvas, onSave]);
+        const displayedWidth = originalImage.getScaledWidth();
+        const displayedHeight = originalImage.getScaledHeight();
+
+        const left = (originalImage.left || 0) - displayedWidth / 2;
+        const top = (originalImage.top || 0) - displayedHeight / 2;
+
+        const prevVpt = (canvas.viewportTransform || [1, 0, 0, 1, 0, 0]).slice() as number[];
+        const prevZoom = canvas.getZoom();
+        canvas.setZoom(1);
+        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+
+        const multiplier = Math.max(1, Math.min(8, naturalWidth / Math.max(1, displayedWidth)));
+
+        const dataURL = canvas.toDataURL({
+          format: "png",
+          quality: 1,
+          left: Math.max(0, Math.round(left)),
+          top: Math.max(0, Math.round(top)),
+          width: Math.round(displayedWidth),
+          height: Math.round(displayedHeight),
+          multiplier,
+        });
+
+        // Restore view
+        canvas.setViewportTransform(prevVpt);
+        canvas.setZoom(prevZoom);
+
+        fetch(dataURL)
+          .then((res) => res.blob())
+          .then((blob) => onSave(blob));
+        return;
+      }
+
+      // Fallback: export whole canvas
+      const dataURL = canvas.toDataURL({ format: "png", quality: 1 });
+      fetch(dataURL)
+        .then((res) => res.blob())
+        .then((blob) => onSave(blob));
+    } catch (error) {
+      console.error("Error exporting image:", error);
+    }
+  }, [canvas, onSave, originalImage]);
 
   const handleCancel = useCallback(() => {
     onCancel();
