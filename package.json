@@ -1,8 +1,8 @@
 {
   "name": "@ozdemircibaris/react-image-editor",
   "private": false,
-  "version": "1.0.8",
-  "description": "A powerful React image editor component with blur, crop, shapes, and undo/redo functionality",
+  "version": "1.0.9",
+  "description": "Professional React image editor component with blur, crop, shapes, drawing, and undo/redo functionality. Built with Fabric.js and modern React patterns.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -26,7 +26,12 @@
     "blur",
     "crop",
     "shapes",
-    "undo-redo"
+    "drawing",
+    "undo-redo",
+    "image-processing",
+    "photo-editor",
+    "web-editor",
+    "typescript"
   ],
   "author": "Baris Ozdemirci",
   "license": "MIT",
@@ -43,7 +48,7 @@
     "@eslint/eslintrc": "^3",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-node-resolve": "^15.3.1",
+    "@rollup/plugin/node-resolve": "^15.3.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@tailwindcss/postcss": "^4",
@@ -67,5 +72,5 @@
   "bugs": {
     "url": "https://github.com/ozdemircibaris/react-image-editor/issues"
   },
-  "homepage": "https://github.com/ozdemircibaris/react-image-editor#readme"
+  "homepage": "https://image-editor.ozdemircibaris.dev"
 }

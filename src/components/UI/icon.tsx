@@ -1,5 +1,3 @@
-"use client";
-
 import { IconNamesType } from "../../constants/icons";
 
 // Import SVG icons as React components
@@ -12,6 +10,7 @@ import pencilIcon from "../../../public/assets/icons/pencil.svg";
 import redoIcon from "../../../public/assets/icons/redo.svg";
 import squareIcon from "../../../public/assets/icons/square.svg";
 import undoIcon from "../../../public/assets/icons/undo.svg";
+import trashIcon from "../../../public/assets/icons/trash.svg";
 
 // Icon mapping - only include icons that actually exist
 const iconMap: Partial<Record<IconNamesType, string>> = {
@@ -23,6 +22,7 @@ const iconMap: Partial<Record<IconNamesType, string>> = {
   redo: redoIcon,
   square: squareIcon,
   undo: undoIcon,
+  trash: trashIcon,
 };
 
 interface IconProps {

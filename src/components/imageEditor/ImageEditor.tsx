@@ -1,7 +1,7 @@
 import { fabric } from "fabric";
 import { useEffect, useCallback, useState } from "react";
 
-import { Icon, Button } from "../UI";
+import { Button } from "../UI";
 
 import { CanvasEditor } from "./CanvasEditor";
 import { useBlurHandlers } from "./hooks/useBlurHandlers";
@@ -270,6 +270,36 @@ const ImageEditor = (props: IImageEditorProps) => {
     setSelectedObject(null);
   }, []);
 
+  // Handle object deletion
+  const handleDeleteObject = useCallback(() => {
+    if (!canvas || !selectedObject) return;
+
+    // Don't allow deletion of the original image
+    if (selectedObject === originalImage) return;
+
+    // If deleting a blur rect, also remove its associated blur patch
+    const customObj = selectedObject as CustomFabricObject;
+    if (customObj.id) {
+      // Check if this is a blur rect and remove its blur patch
+      const objects = canvas.getObjects();
+      objects.forEach((obj: fabric.Object) => {
+        const customBlurObj = obj as CustomFabricObject;
+        if (customBlurObj.isBlurPatch && customBlurObj.blurRectId === customObj.id) {
+          canvas.remove(obj);
+        }
+      });
+    }
+
+    // Remove the selected object
+    canvas.remove(selectedObject);
+    canvas.discardActiveObject();
+    setSelectedObject(null);
+    canvas.renderAll();
+
+    // Save state for undo/redo
+    saveState();
+  }, [canvas, selectedObject, originalImage, saveState]);
+
   // Handle color change - affects selected object, draw brush, and new shapes
   const handleColorChange = useCallback(
     (color: string) => {
@@ -418,7 +448,7 @@ const ImageEditor = (props: IImageEditorProps) => {
     };
   }, [canvas, saveState]);
 
-  // Add keyboard shortcuts for undo/redo
+  // Add keyboard shortcuts for undo/redo and delete
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
@@ -430,6 +460,9 @@ const ImageEditor = (props: IImageEditorProps) => {
       ) {
         e.preventDefault();
         redo();
+      } else if (e.key === "Backspace" || e.key === "Delete") {
+        e.preventDefault();
+        handleDeleteObject();
       }
     };
 
@@ -437,7 +470,7 @@ const ImageEditor = (props: IImageEditorProps) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [undo, redo]);
+  }, [undo, redo, handleDeleteObject]);
 
   useEffect(() => {
     return () => {
@@ -476,6 +509,7 @@ const ImageEditor = (props: IImageEditorProps) => {
           onRedo={redo}
           canUndo={canUndo}
           canRedo={canRedo}
+          onDeleteObject={handleDeleteObject}
         />
 
         <div className="image-editor-actions">

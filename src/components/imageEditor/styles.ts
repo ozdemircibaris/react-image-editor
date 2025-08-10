@@ -139,6 +139,19 @@ export const imageEditorStyles = `
   transform: none;
 }
 
+.toolbar-button.delete-button {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #ef4444;
+}
+
+.toolbar-button.delete-button:hover {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: #ef4444;
+  color: #fca5a5;
+  transform: scale(1.05);
+}
+
 .toolbar-divider {
   width: 1px;
   height: 2rem;

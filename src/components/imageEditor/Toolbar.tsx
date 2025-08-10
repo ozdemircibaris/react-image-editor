@@ -30,6 +30,7 @@ interface ToolbarButtonProps {
   title: string;
   isActive?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 const ToolbarButton: React.FC<ToolbarButtonProps> = ({
@@ -38,12 +39,13 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
   title,
   isActive = false,
   disabled = false,
+  className = "",
 }) => {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`toolbar-button ${isActive ? "active" : ""} ${disabled ? "disabled" : ""}`}
+      className={`toolbar-button ${isActive ? "active" : ""} ${disabled ? "disabled" : ""} ${className}`}
       title={title}
     >
       <Icon name={iconName} width={20} height={20} className="text-white" />
@@ -123,6 +125,7 @@ interface ToolbarProps {
   onRedo?: () => void;
   canUndo?: boolean;
   canRedo?: boolean;
+  onDeleteObject?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -146,6 +149,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onRedo,
   canUndo = false,
   canRedo = false,
+  onDeleteObject,
 }) => {
   return (
     <div className="toolbar">
@@ -243,6 +247,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
           <ToolbarButton iconName="undo" onClick={onUndo || (() => {})} title="Undo (Ctrl+Z)" disabled={!canUndo} />
           <ToolbarButton iconName="redo" onClick={onRedo || (() => {})} title="Redo (Ctrl+Y)" disabled={!canRedo} />
+
+          {selectedObject && (
+            <>
+              <div className="toolbar-divider" />
+              <ToolbarButton
+                iconName="trash"
+                onClick={onDeleteObject || (() => {})}
+                title="Delete (Backspace)"
+                disabled={false}
+                className="delete-button"
+              />
+            </>
+          )}
         </>
       )}
     </div>

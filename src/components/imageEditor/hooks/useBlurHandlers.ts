@@ -36,14 +36,15 @@ export const useBlurHandlers = (
       const rectWidth = blurRect.getScaledWidth();
       const rectHeight = blurRect.getScaledHeight();
 
-      // Image bounds in canvas-space
-      const imgScaleX = originalImage.scaleX || 1;
-      const imgScaleY = originalImage.scaleY || 1;
-      const imgScaledW = (originalImage.width || 0) * imgScaleX;
-      const imgScaledH = (originalImage.height || 0) * imgScaleY;
-      const imgCenter = new fabric.Point(originalImage.left || 0, originalImage.top || 0);
-      const imgTL = new fabric.Point(imgCenter.x - imgScaledW / 2, imgCenter.y - imgScaledH / 2);
-      const imgBR = new fabric.Point(imgTL.x + imgScaledW, imgTL.y + imgScaledH);
+      // Image bounds in canvas-space - image uses originX: "left" and originY: "top"
+      const imgLeft = originalImage.left || 0;
+      const imgTop = originalImage.top || 0;
+      const imgScaledW = originalImage.getScaledWidth();
+      const imgScaledH = originalImage.getScaledHeight();
+
+      // Image bounds (top-left corner to bottom-right corner)
+      const imgTL = new fabric.Point(imgLeft, imgTop);
+      const imgBR = new fabric.Point(imgLeft + imgScaledW, imgTop + imgScaledH);
 
       // Calculate intersection between blur rect and image (canvas-space)
       const rectRight = rectLeft + rectWidth;
@@ -65,6 +66,8 @@ export const useBlurHandlers = (
       }
 
       // Convert intersection to original image pixel coordinates
+      const imgScaleX = originalImage.scaleX || 1;
+      const imgScaleY = originalImage.scaleY || 1;
       const pxX = Math.round((interLeft - imgTL.x) / imgScaleX);
       const pxY = Math.round((interTop - imgTL.y) / imgScaleY);
       const pxW = Math.round(interW / imgScaleX);
@@ -129,9 +132,11 @@ export const useBlurHandlers = (
     // Compute image bounds in canvas space (independent of viewport)
     const imgScaledW = originalImage.getScaledWidth();
     const imgScaledH = originalImage.getScaledHeight();
+    const imgLeft = originalImage.left || 0;
+    const imgTop = originalImage.top || 0;
     const imgBounds = {
-      left: (originalImage.left || 0) - imgScaledW / 2,
-      top: (originalImage.top || 0) - imgScaledH / 2,
+      left: imgLeft,
+      top: imgTop,
       width: imgScaledW,
       height: imgScaledH,
     };

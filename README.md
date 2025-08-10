@@ -1,27 +1,38 @@
 # React Image Editor
 
-A powerful React image editor component built with Fabric.js, featuring blur, crop, shapes, and undo/redo functionality.
+Professional image editing made simple with a powerful React component built on modern web technologies.
 
-## Features
+[![Demo](https://img.shields.io/badge/Demo-Live%20Preview-blue?style=for-the-badge)](https://image-editor.ozdemircibaris.dev)
+[![Version](https://img.shields.io/badge/version-1.0.9-green.svg)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-- 🎨 **Image Editing**: Load and edit images with various tools
-- 🔍 **Blur Tool**: Add blur effects to specific areas
-- ✂️ **Crop Tool**: Crop images to desired dimensions
-- 🔷 **Shape Tools**: Add rectangles and circles
-- ↩️ **Undo/Redo**: Full undo/redo functionality
-- 🎯 **Drawing Mode**: Free-hand drawing capabilities
-- 🎨 **Color Picker**: Customizable colors for shapes and drawings
-- 📏 **Stroke Width**: Adjustable stroke width for shapes and drawings
+## ✨ Features
 
-## Installation
+- 🎨 **Professional Image Editing** - Load and edit images with intuitive tools
+- 🔍 **Smart Blur Tool** - Add selective blur effects to specific areas
+- ✂️ **Precise Crop Tool** - Crop images with pixel-perfect accuracy
+- 🔷 **Shape Tools** - Add rectangles and circles with custom styling
+- ✏️ **Drawing Mode** - Free-hand drawing with customizable brush settings
+- ↩️ **Undo/Redo System** - Full history management with keyboard shortcuts
+- 🎯 **Selection Mode** - Intuitive object selection and manipulation
+- 🎨 **Color & Stroke Control** - Customizable colors and stroke widths
+- ⌨️ **Keyboard Shortcuts** - Professional workflow with Ctrl+Z, Ctrl+Y, Delete
+
+## 🚀 Live Demo
+
+**Try it now:** [https://image-editor.ozdemircibaris.dev](https://image-editor.ozdemircibaris.dev)
+
+## 📦 Installation
 
 ```bash
 npm install @ozdemircibaris/react-image-editor
 # or
 yarn add @ozdemircibaris/react-image-editor
+# or
+pnpm add @ozdemircibaris/react-image-editor
 ```
 
-## Usage
+## 🎯 Quick Start
 
 ```jsx
 import React, { useState } from "react";
@@ -30,23 +41,51 @@ import { ImageEditor } from "@ozdemircibaris/react-image-editor";
 function App() {
   const [imageUrl, setImageUrl] = useState("");
 
+  const handleImageSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImageUrl(url);
+    }
+  };
+
   const handleSave = (imageBlob) => {
     // Handle the saved image blob
     const url = URL.createObjectURL(imageBlob);
     console.log("Saved image URL:", url);
+
+    // You can also download the image
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = "edited-image.png";
+    downloadLink.click();
   };
 
   const handleCancel = () => {
     console.log("Editing cancelled");
+    setImageUrl(""); // Reset image
   };
 
-  return <div>{imageUrl && <ImageEditor imageUrl={imageUrl} onSave={handleSave} onCancel={handleCancel} />}</div>;
+  return (
+    <div>
+      {!imageUrl ? (
+        <div className="image-picker">
+          <input type="file" accept="image/*" onChange={handleImageSelect} className="file-input" />
+          <p>Select an image to start editing</p>
+        </div>
+      ) : (
+        <ImageEditor imageUrl={imageUrl} onSave={handleSave} onCancel={handleCancel} />
+      )}
+    </div>
+  );
 }
 
 export default App;
 ```
 
-## Props
+## 🔧 API Reference
+
+### Props
 
 | Prop       | Type                        | Required | Description                        |
 | ---------- | --------------------------- | -------- | ---------------------------------- |
@@ -54,109 +93,50 @@ export default App;
 | `onSave`   | `(imageBlob: Blob) => void` | Yes      | Callback when image is saved       |
 | `onCancel` | `() => void`                | Yes      | Callback when editing is cancelled |
 
-## API
+### Available Tools
 
-### ImageEditor Component
+- **Selection Mode** - Select and manipulate objects
+- **Drawing Mode** - Free-hand drawing with customizable brush
+- **Blur Tool** - Add selective blur effects
+- **Crop Tool** - Precise image cropping
+- **Shape Tools** - Add rectangles and circles
+- **Undo/Redo** - Full operation history with keyboard shortcuts
 
-The main component that provides the full image editing experience.
+## 🚀 Coming Soon
 
-### Hooks
+- **📝 Text Tool** - Add and edit text on images
+- **➡️ Arrow Tool** - Draw arrows and lines
+- **📱 Mobile UI** - Optimized interface for mobile devices
+- **🎨 Filters** - Instagram-style filters and effects
+- **🤖 AI Tools** - Background removal and object recognition
 
-#### useBlurHandlers
+## 🛠️ Development
 
-```jsx
-import { useBlurHandlers } from "@ozdemircibaris/react-image-editor";
+```bash
+# Clone and setup
+git clone https://github.com/ozdemircibaris/react-image-editor.git
+cd react-image-editor
+npm install
 
-const { activeBlurRects, setActiveBlurRects, handleAddBlur } = useBlurHandlers(
-  canvas,
-  originalImage,
-  isDrawing,
-  setIsSelectMode,
-);
+# Start development server
+npm run dev
+
+# Build library
+npm run build:lib
 ```
 
-#### useCropHandlers
+## 📄 License
 
-```jsx
-import { useCropHandlers } from "@ozdemircibaris/react-image-editor";
+MIT License - see [LICENSE](LICENSE) file for details.
 
-const { isCropping, setIsCropping, handleCropStart, handleCropApply, handleCropCancel } = useCropHandlers(
-  canvas,
-  originalImage,
-  isDrawing,
-  activeBlurRects,
-  setActiveBlurRects,
-  setIsSelectMode,
-  setOriginalImage,
-);
-```
+## 📞 Support
 
-#### useShapeHandlers
+- **Demo**: [https://image-editor.ozdemircibaris.dev](https://image-editor.ozdemircibaris.dev)
+- **Issues**: [GitHub Issues](https://github.com/ozdemircibaris/react-image-editor/issues)
 
-```jsx
-import { useShapeHandlers } from "@ozdemircibaris/react-image-editor";
+---
 
-const { handleAddShape } = useShapeHandlers(
-  canvas,
-  isCropping,
-  isDrawing,
-  currentColor,
-  currentStrokeWidth,
-  setIsSelectMode,
-);
-```
+Built with ❤️ by [@ozdemircibaris](https://github.com/ozdemircibaris)
 
-#### useUndoRedo
-
-```jsx
-import { useUndoRedo } from "@ozdemircibaris/react-image-editor";
-
-const { saveState, undo, redo, initializeHistory, canUndo, canRedo } = useUndoRedo(
-  canvas,
-  50, // max history size
-  updateOriginalImageReference,
-);
-```
-
-## Types
-
-```typescript
-interface IImageEditorProps {
-  imageUrl: string;
-  onSave: (imageBlob: Blob) => void;
-  onCancel: () => void;
-}
-
-interface CustomFabricObject extends fabric.Object {
-  id?: string;
-  isDrawing?: boolean;
-  isBlurPatch?: boolean;
-  blurRectId?: string;
-  stroke?: string;
-  strokeWidth?: number;
-}
-```
-
-## Dependencies
-
-This package has the following peer dependencies:
-
-- React >= 16.8.0
-- React DOM >= 16.8.0
-
-And the following dependencies:
-
-- Fabric.js
-- HeroUI React
-- Radix UI Popover
-
-## Development
-
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Start development server: `npm run dev`
-4. Build the library: `npm run build:lib`
-
-## License
-
-MIT
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/ozdemircibaris/react-image-editor)
+[![NPM](https://img.shields.io/badge/NPM-Package-red?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
