@@ -333,55 +333,126 @@ const ImageEditor = (props: IImageEditorProps) => {
   );
 
   const handleSave = useCallback(() => {
-    if (!canvas) return;
+    if (!canvas || !originalImage) return;
 
     try {
-      // If we have the original image, export exactly its bounds scaled to its natural resolution
-      if (originalImage) {
-        const imgEl = originalImage.getElement() as HTMLImageElement;
-        const naturalWidth = (imgEl as any).naturalWidth || imgEl.width || originalImage.width || 0;
-        const naturalHeight = (imgEl as any).naturalHeight || imgEl.height || originalImage.height || 0;
+      // Get current canvas state
+      const currentZoom = canvas.getZoom();
+      const currentViewportTransform = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
 
-        const displayedWidth = originalImage.getScaledWidth();
-        const displayedHeight = originalImage.getScaledHeight();
+      // Get the original image element for natural dimensions
+      const imgEl = originalImage.getElement() as HTMLImageElement;
+      const naturalWidth = (imgEl as any).naturalWidth || imgEl.width || originalImage.width || 0;
+      const naturalHeight = (imgEl as any).naturalHeight || imgEl.height || originalImage.height || 0;
 
-        const left = (originalImage.left || 0) - displayedWidth / 2;
-        const top = (originalImage.top || 0) - displayedHeight / 2;
+      // Get the image's actual dimensions on canvas considering current zoom
+      const imageScaledWidth = originalImage.getScaledWidth();
+      const imageScaledHeight = originalImage.getScaledHeight();
 
-        const prevVpt = (canvas.viewportTransform || [1, 0, 0, 1, 0, 0]).slice() as number[];
-        const prevZoom = canvas.getZoom();
-        canvas.setZoom(1);
-        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+      // Get the image's position on canvas considering current zoom
+      const imageLeft = originalImage.left || 0;
+      const imageTop = originalImage.top || 0;
 
-        const multiplier = Math.max(1, Math.min(8, naturalWidth / Math.max(1, displayedWidth)));
+      // Get all objects that should be included in export (image + edits)
+      const objectsToExport = canvas.getObjects().filter((obj) => {
+        // Always include the original image
+        if (obj === originalImage) return true;
 
-        const dataURL = canvas.toDataURL({
-          format: "png",
-          quality: 1,
-          left: Math.max(0, Math.round(left)),
-          top: Math.max(0, Math.round(top)),
-          width: Math.round(displayedWidth),
-          height: Math.round(displayedHeight),
-          multiplier,
-        });
+        // Include blur rects, shapes, and drawings
+        const customObj = obj as CustomFabricObject;
+        return customObj.isBlurPatch || customObj.isDrawing || (customObj.stroke && customObj.strokeWidth); // shapes
+      });
 
-        // Restore view
-        canvas.setViewportTransform(prevVpt);
-        canvas.setZoom(prevZoom);
+      // Calculate the bounding box that includes all relevant objects
+      // Start with the image bounds as the base, considering zoom
+      let minX = imageLeft;
+      let minY = imageTop;
+      let maxX = imageLeft + imageScaledWidth;
+      let maxY = imageTop + imageScaledHeight;
 
-        fetch(dataURL)
-          .then((res) => res.blob())
-          .then((blob) => onSave(blob));
-        return;
-      }
+      // Add other objects to the bounding box
+      objectsToExport.forEach((obj) => {
+        if (obj !== originalImage) {
+          const objBounds = obj.getBoundingRect();
+          minX = Math.min(minX, objBounds.left);
+          minY = Math.min(minY, objBounds.top);
+          maxX = Math.max(maxX, objBounds.left + objBounds.width);
+          maxY = Math.max(maxY, objBounds.top + objBounds.height);
+        }
+      });
 
-      // Fallback: export whole canvas
-      const dataURL = canvas.toDataURL({ format: "png", quality: 1 });
+      // Ensure we don't export beyond canvas boundaries
+      const canvasWidth = canvas.getWidth();
+      const canvasHeight = canvas.getHeight();
+
+      minX = Math.max(0, minX);
+      minY = Math.max(0, minY);
+      maxX = Math.min(canvasWidth, maxX);
+      maxY = Math.min(canvasHeight, maxY);
+
+      // Calculate export dimensions
+      const exportWidth = maxX - minX;
+      const exportHeight = maxY - minY;
+
+      // Calculate the scale factor to maintain original image quality
+      // We want to export at the natural resolution of the image
+      // The key insight: we need to account for the current zoom level
+      const currentZoomFactor = currentZoom;
+      const adjustedScaleFactor = Math.max(1, Math.min(4, naturalWidth / (exportWidth * currentZoomFactor)));
+
+      // Reset canvas to default state for accurate export
+      canvas.setZoom(1);
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+
+      // Export the specific area - ONLY the image and edits, no extra canvas space
+      const dataURL = canvas.toDataURL({
+        format: "png",
+        quality: 1,
+        left: Math.round(minX),
+        top: Math.round(minY),
+        width: Math.round(exportWidth),
+        height: Math.round(exportHeight),
+        multiplier: adjustedScaleFactor,
+      });
+
+      // Restore the user's view state
+      canvas.setZoom(currentZoom);
+      canvas.setViewportTransform(currentViewportTransform);
+      canvas.renderAll();
+
+      // Convert to blob and save
       fetch(dataURL)
-        .then((res) => res.blob())
-        .then((blob) => onSave(blob));
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          return res.blob();
+        })
+        .then((blob) => onSave(blob))
+        .catch((error) => {
+          console.error("Error converting image to blob:", error);
+          // Fallback: try to export without custom bounds
+          const fallbackDataURL = canvas.toDataURL({ format: "png", quality: 1 });
+          return fetch(fallbackDataURL);
+        })
+        .then((res) => res?.blob())
+        .then((blob) => blob && onSave(blob))
+        .catch((error) => {
+          console.error("Error in fallback export:", error);
+        });
     } catch (error) {
       console.error("Error exporting image:", error);
+
+      // Fallback: export whole canvas if custom export fails
+      try {
+        const fallbackDataURL = canvas.toDataURL({ format: "png", quality: 1 });
+        fetch(fallbackDataURL)
+          .then((res) => res.blob())
+          .then((blob) => onSave(blob))
+          .catch((fallbackError) => {
+            console.error("Fallback export also failed:", fallbackError);
+          });
+      } catch (fallbackError) {
+        console.error("Fallback export failed:", fallbackError);
+      }
     }
   }, [canvas, onSave, originalImage]);
 
