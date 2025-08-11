@@ -126,6 +126,15 @@ interface ToolbarProps {
   canUndo?: boolean;
   canRedo?: boolean;
   onDeleteObject?: () => void;
+  // New props for customization
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  className?: string;
+  buttonClassName?: string;
+  saveButtonClassName?: string;
+  cancelButtonClassName?: string;
+  saveButtonTitle?: string;
+  cancelButtonTitle?: string;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -150,9 +159,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   canUndo = false,
   canRedo = false,
   onDeleteObject,
+  // New props with defaults
+  showCancelButton = false,
+  onCancel,
+  className = "",
+  buttonClassName = "",
+  saveButtonClassName = "",
+  cancelButtonClassName = "",
+  saveButtonTitle = "Save",
+  cancelButtonTitle = "Cancel",
 }) => {
   return (
-    <div className="toolbar">
+    <div className={`toolbar ${className}`}>
       {hasImage && (
         <>
           <ToolbarButton
@@ -161,6 +179,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Select"
             isActive={isSelectMode}
             disabled={false}
+            className={buttonClassName}
           />
           <ToolbarButton
             iconName="pencil"
@@ -168,14 +187,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Draw"
             isActive={isDrawing}
             disabled={isCropping}
+            className={buttonClassName}
           />
-          <ToolbarButton iconName="crop" onClick={onCropStart} title="Crop" disabled={isCropping || isDrawing} />
+          <ToolbarButton
+            iconName="crop"
+            onClick={onCropStart}
+            title="Crop"
+            disabled={isCropping || isDrawing}
+            className={buttonClassName}
+          />
           <ToolbarButton
             iconName="blur"
             onClick={onAddBlur}
             title="Blur"
             isActive={isBlurActive}
             disabled={isCropping || isDrawing}
+            className={buttonClassName}
           />
           <ToolbarButton
             iconName="square"
@@ -183,6 +210,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Rectangle"
             isActive={activeShape === "rectangle"}
             disabled={isCropping || isDrawing}
+            className={buttonClassName}
           />
           <ToolbarButton
             iconName="circle"
@@ -190,13 +218,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             title="Circle"
             isActive={activeShape === "circle"}
             disabled={isCropping || isDrawing}
+            className={buttonClassName}
           />
 
           <div className="toolbar-divider" />
 
           <Popover
             trigger={
-              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"}`}>
+              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"} ${buttonClassName}`}>
                 <div className="w-6 h-6 rounded border-2 border-gray-700" style={{ backgroundColor: currentColor }} />
               </div>
             }
@@ -207,7 +236,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
           <Popover
             trigger={
-              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"}`}>
+              <div className={`toolbar-button ${selectedObject || isDrawing ? "" : "disabled"} ${buttonClassName}`}>
                 {/* Custom inline stroke width indicator */}
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <div
@@ -245,8 +274,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
           <div className="toolbar-divider" />
 
-          <ToolbarButton iconName="undo" onClick={onUndo || (() => {})} title="Undo (Ctrl+Z)" disabled={!canUndo} />
-          <ToolbarButton iconName="redo" onClick={onRedo || (() => {})} title="Redo (Ctrl+Y)" disabled={!canRedo} />
+          <ToolbarButton
+            iconName="undo"
+            onClick={onUndo || (() => {})}
+            title="Undo (Ctrl+Z)"
+            disabled={!canUndo}
+            className={buttonClassName}
+          />
+          <ToolbarButton
+            iconName="redo"
+            onClick={onRedo || (() => {})}
+            title="Redo (Ctrl+Y)"
+            disabled={!canRedo}
+            className={buttonClassName}
+          />
 
           {selectedObject && (
             <>
@@ -256,7 +297,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 onClick={onDeleteObject || (() => {})}
                 title="Delete (Backspace)"
                 disabled={false}
-                className="delete-button"
+                className={`delete-button ${buttonClassName}`}
               />
             </>
           )}

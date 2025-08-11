@@ -4,9 +4,20 @@ import { useEffect, useRef, useCallback, useState } from "react";
 interface CanvasProps {
   canvas: fabric.Canvas | null;
   onCanvasReady: (canvas: fabric.Canvas) => void;
+  className?: string;
+  zoomButtonClassName?: string;
+  background?: string;
+  canvasWrapperClassName?: string;
 }
 
-export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) => {
+export const CanvasEditor: React.FC<CanvasProps> = ({
+  canvas,
+  onCanvasReady,
+  className = "",
+  zoomButtonClassName = "",
+  background,
+  canvasWrapperClassName = "",
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSpaceDown, setIsSpaceDown] = useState(false);
@@ -47,8 +58,9 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
       const fabricCanvas = new fabric.Canvas(canvasRef.current!);
       fabricCanvas.setWidth(width);
       fabricCanvas.setHeight(height);
-      // Remove white background - make it transparent
-      fabricCanvas.setBackgroundColor("transparent", () => {
+      // Use custom background if provided, otherwise transparent
+      const backgroundColor = background || "transparent";
+      fabricCanvas.setBackgroundColor(backgroundColor, () => {
         fabricCanvas.renderAll();
       });
 
@@ -67,7 +79,7 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
         }
       }
     };
-  }, [canvas, onCanvasReady, calculateCanvasSize]);
+  }, [canvas, onCanvasReady, calculateCanvasSize, background]);
 
   // Handle window resize
   useEffect(() => {
@@ -193,8 +205,8 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
   }, [canvas]);
 
   return (
-    <div className="canvas-container">
-      <div className="canvas-wrapper">
+    <div className={`canvas-container ${className}`}>
+      <div className={`canvas-wrapper ${canvasWrapperClassName}`}>
         <canvas ref={canvasRef} className="canvas-element" />
 
         {/* Zoom controls overlay */}
@@ -218,15 +230,16 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
               type="button"
               title="Zoom out"
               onClick={handleZoomOut}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 8,
-                background: "rgba(31,41,55,0.9)",
-                color: "#d1d5db",
-                border: "1px solid rgba(255,255,255,0.08)",
-                cursor: "pointer",
-              }}
+              className={`zoom-button zoom-out ${zoomButtonClassName}`}
+              style={
+                !zoomButtonClassName
+                  ? {
+                      background: "#1f2937",
+                      color: "#d1d5db",
+                      borderColor: "rgba(255,255,255,0.08)",
+                    }
+                  : {}
+              }
             >
               −
             </button>
@@ -234,15 +247,16 @@ export const CanvasEditor: React.FC<CanvasProps> = ({ canvas, onCanvasReady }) =
               type="button"
               title="Zoom in"
               onClick={handleZoomIn}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 8,
-                background: "linear-gradient(135deg,#3b82f6 0%, #8b5cf6 100%)",
-                color: "white",
-                border: "1px solid rgba(59,130,246,0.35)",
-                cursor: "pointer",
-              }}
+              className={`zoom-button zoom-in ${zoomButtonClassName}`}
+              style={
+                !zoomButtonClassName
+                  ? {
+                      background: "#3b82f6",
+                      color: "white",
+                      borderColor: "rgba(59,130,246,0.35)",
+                    }
+                  : {}
+              }
             >
               +
             </button>

@@ -10,6 +10,46 @@ export const imageEditorStyles = `
   color: white;
 }
 
+/* Ensure custom background classes can override the default gradient */
+.image-editor-container[class*="bg-"] {
+  background: inherit !important;
+}
+
+.image-editor-container[class*="bg-red-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-blue-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-green-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-yellow-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-purple-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-pink-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
+.image-editor-container[class*="bg-gray-"] {
+  background-color: inherit !important;
+  background-image: none !important;
+}
+
 .image-editor-header {
   background: rgba(17, 24, 39, 0.5);
   backdrop-filter: blur(8px);
@@ -662,6 +702,150 @@ export const imageEditorStyles = `
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Zoom Button Styles */
+.zoom-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Default styles - only apply when no custom className is provided */
+.zoom-button.zoom-in:not([style*="background"]) {
+  background: #3b82f6;
+  color: white;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.zoom-button.zoom-in:not([style*="background"]):hover {
+  background: #2563eb;
+}
+
+.zoom-button.zoom-out:not([style*="background"]) {
+  background: #1f2937;
+  color: #d1d5db;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.zoom-button.zoom-out:not([style*="background"]):hover {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+/* Ensure custom className props always override default styles */
+.zoom-button[class*="bg-"] {
+  background: inherit !important;
+}
+
+.zoom-button[class*="text-"] {
+  color: inherit !important;
+}
+
+.zoom-button[class*="border-"] {
+  border-color: inherit !important;
+}
+
+/* Customization Override Classes */
+.image-editor-container.custom-theme {
+  background: var(--custom-background, linear-gradient(135deg, #111827 0%, #1f2937 50%, #000000 100%));
+}
+
+.toolbar.custom-toolbar {
+  background: var(--custom-toolbar-bg, rgba(31, 41, 55, 0.5));
+  border: var(--custom-toolbar-border, 1px solid #374151);
+}
+
+.toolbar-button.custom-button {
+  background: var(--custom-button-bg, rgba(31, 41, 55, 0.5));
+  border-color: var(--custom-button-border, transparent);
+  color: var(--custom-button-color, #d1d5db);
+}
+
+.toolbar-button.custom-button:hover {
+  background: var(--custom-button-hover-bg, rgba(59, 130, 246, 0.1));
+  border-color: var(--custom-button-hover-border, #3b82f6);
+  color: var(--custom-button-hover-color, #3b82f6);
+}
+
+.image-editor-button.custom-save-button {
+  background: var(--custom-save-bg, linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%));
+  color: var(--custom-save-color, white);
+  border: var(--custom-save-border, none);
+}
+
+.image-editor-button.custom-cancel-button {
+  background: var(--custom-cancel-bg, rgba(75, 85, 99, 0.5));
+  color: var(--custom-cancel-color, white);
+  border: var(--custom-cancel-border, 1px solid #374151);
+}
+
+.zoom-button.custom-zoom-button {
+  background: var(--custom-zoom-bg, rgba(31, 41, 55, 0.9));
+  color: var(--custom-zoom-color, #d1d5db);
+  border: var(--custom-zoom-border, 1px solid rgba(255, 255, 255, 0.08));
+}
+
+.zoom-button.custom-zoom-button:hover {
+  background: var(--custom-zoom-hover-bg, rgba(55, 65, 81, 0.9));
+  transform: var(--custom-zoom-hover-transform, scale(1.1));
+}
+
+/* Save and Cancel Button Specific Styles */
+.image-editor-actions .image-editor-button {
+  /* Ensure custom classes can override default styles */
+  transition: all 0.2s ease;
+}
+
+.image-editor-actions .image-editor-button-primary {
+  /* Default save button styles */
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.25);
+}
+
+.image-editor-actions .image-editor-button-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.35);
+}
+
+.image-editor-actions .image-editor-button-secondary {
+  /* Default cancel button styles */
+  background: rgba(75, 85, 99, 0.5);
+  color: white;
+  border: 1px solid #374151;
+}
+
+.image-editor-actions .image-editor-button-secondary:hover {
+  background: rgba(75, 85, 99, 0.7);
+  border-color: #4b5563;
+}
+
+/* Ensure custom className props can override with !important if needed */
+.image-editor-actions .image-editor-button[class*="bg-"] {
+  background: inherit !important;
+}
+
+.image-editor-actions .image-editor-button[class*="text-"] {
+  color: inherit !important;
+}
+
+.image-editor-actions .image-editor-button[class*="border-"] {
+  border: inherit !important;
 }
 `;
 

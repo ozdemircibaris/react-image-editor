@@ -65,3 +65,20 @@ export interface UseUndoRedoReturn {
   canUndo: boolean;
   canRedo: boolean;
 }
+
+// Customization types
+export interface ImageEditorCustomization {
+  showCancelButton?: boolean;
+  className?: string;
+  headerClassName?: string;
+  toolbarClassName?: string;
+  buttonClassName?: string;
+  saveButtonClassName?: string;
+  cancelButtonClassName?: string;
+  canvasClassName?: string;
+  canvasWrapperClassName?: string;
+  zoomButtonClassName?: string;
+  background?: string;
+  saveButtonTitle?: string;
+  cancelButtonTitle?: string;
+}

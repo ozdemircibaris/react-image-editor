@@ -17,6 +17,8 @@ Professional image editing made simple with a powerful React component built on 
 - 🎯 **Selection Mode** - Intuitive object selection and manipulation
 - 🎨 **Color & Stroke Control** - Customizable colors and stroke widths
 - ⌨️ **Keyboard Shortcuts** - Professional workflow with Ctrl+Z, Ctrl+Y, Delete
+- 🎛️ **Customizable UI** - Fully customizable styling with CSS classes
+- ❌ **Optional Cancel Button** - Configurable cancel functionality
 
 ## 🚀 Live Demo
 
@@ -87,11 +89,24 @@ export default App;
 
 ### Props
 
-| Prop       | Type                        | Required | Description                        |
-| ---------- | --------------------------- | -------- | ---------------------------------- |
-| `imageUrl` | `string`                    | Yes      | URL of the image to edit           |
-| `onSave`   | `(imageBlob: Blob) => void` | Yes      | Callback when image is saved       |
-| `onCancel` | `() => void`                | Yes      | Callback when editing is cancelled |
+| Prop                     | Type                        | Required | Default         | Description                               |
+| ------------------------ | --------------------------- | -------- | --------------- | ----------------------------------------- |
+| `imageUrl`               | `string`                    | Yes      | -               | URL of the image to edit                  |
+| `onSave`                 | `(imageBlob: Blob) => void` | Yes      | -               | Callback when image is saved              |
+| `onCancel`               | `() => void`                | Yes      | -               | Callback when editing is cancelled        |
+| `showCancelButton`       | `boolean`                   | No       | `false`         | Whether to show the cancel button         |
+| `className`              | `string`                    | No       | `""`            | Custom CSS class for the main container   |
+| `headerClassName`        | `string`                    | No       | `""`            | Custom CSS class for the header           |
+| `toolbarClassName`       | `string`                    | No       | `""`            | Custom CSS class for the toolbar          |
+| `buttonClassName`        | `string`                    | No       | `""`            | Custom CSS class for toolbar buttons      |
+| `saveButtonClassName`    | `string`                    | No       | `""`            | Custom CSS class for the save button      |
+| `cancelButtonClassName`  | `string`                    | No       | `""`            | Custom CSS class for the cancel button    |
+| `canvasClassName`        | `string`                    | No       | `""`            | Custom CSS class for the canvas container |
+| `canvasWrapperClassName` | `string`                    | No       | `""`            | Custom CSS class for the canvas wrapper   |
+| `zoomButtonClassName`    | `string`                    | No       | `""`            | Custom CSS class for zoom buttons         |
+| `background`             | `string`                    | No       | `"transparent"` | Custom background color for canvas        |
+| `saveButtonTitle`        | `string`                    | No       | `"Save"`        | Custom text for the save button           |
+| `cancelButtonTitle`      | `string`                    | No       | `"Cancel"`      | Custom text for the cancel button         |
 
 ### Available Tools
 
@@ -101,6 +116,76 @@ export default App;
 - **Crop Tool** - Precise image cropping
 - **Shape Tools** - Add rectangles and circles
 - **Undo/Redo** - Full operation history with keyboard shortcuts
+
+### Customization Examples
+
+#### Basic Customization
+
+```jsx
+<ImageEditor
+  imageUrl={imageUrl}
+  onSave={handleSave}
+  onCancel={handleCancel}
+  showCancelButton={true}
+  className="my-custom-editor"
+  background="#f0f0f0"
+/>
+```
+
+#### Advanced Styling with Tailwind CSS
+
+```jsx
+<ImageEditor
+  imageUrl={imageUrl}
+  onSave={handleSave}
+  onCancel={handleCancel}
+  showCancelButton={true}
+  headerClassName="bg-gradient-to-r from-purple-500 to-pink-500"
+  toolbarClassName="border-2 border-blue-300 rounded-lg"
+  buttonClassName="bg-blue-500 hover:bg-blue-600 text-white"
+  saveButtonClassName="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full"
+  cancelButtonClassName="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full"
+  canvasClassName="border-4 border-dashed border-gray-400"
+  canvasWrapperClassName="shadow-2xl border-4 border-purple-300"
+  zoomButtonClassName="bg-yellow-500 hover:bg-yellow-600 text-black"
+  saveButtonTitle="Save"
+  cancelButtonTitle="Cancel"
+/>
+```
+
+#### Custom CSS Classes
+
+```jsx
+<ImageEditor
+  imageUrl={imageUrl}
+  onSave={handleSave}
+  onCancel={handleCancel}
+  showCancelButton={true}
+  className="custom-theme"
+  toolbarClassName="custom-toolbar"
+  buttonClassName="custom-button"
+  saveButtonClassName="custom-save-button"
+  cancelButtonClassName="custom-cancel-button"
+  zoomButtonClassName="custom-zoom-button"
+  saveButtonTitle="💾 Save Image"
+  cancelButtonTitle="❌ Cancel"
+/>
+```
+
+#### Active State Customization
+
+```jsx
+<ImageEditor
+  imageUrl={imageUrl}
+  onSave={handleSave}
+  onCancel={handleCancel}
+  showCancelButton={true}
+  // Customize active state of toolbar buttons
+  buttonClassName="[&.active]:bg-red-500 [&.active]:border-red-600 [&.active]:text-white"
+  // Or use custom CSS classes
+  // buttonClassName="custom-active-button"
+/>
+```
 
 ## 🚀 Coming Soon
 

@@ -18,10 +18,42 @@ export interface IImageEditorProps {
   imageUrl: string;
   onSave: (imageBlob: Blob) => void;
   onCancel: () => void;
+  // New customization props
+  showCancelButton?: boolean;
+  className?: string;
+  headerClassName?: string;
+  toolbarClassName?: string;
+  buttonClassName?: string;
+  saveButtonClassName?: string;
+  cancelButtonClassName?: string;
+  canvasClassName?: string;
+  canvasWrapperClassName?: string;
+  zoomButtonClassName?: string;
+  background?: string;
+  saveButtonTitle?: string;
+  cancelButtonTitle?: string;
 }
 
 const ImageEditor = (props: IImageEditorProps) => {
-  const { imageUrl, onSave, onCancel } = props;
+  const {
+    imageUrl,
+    onSave,
+    onCancel,
+    // New props with defaults
+    showCancelButton = false,
+    className = "",
+    headerClassName = "",
+    toolbarClassName = "",
+    buttonClassName = "",
+    saveButtonClassName = "",
+    cancelButtonClassName = "",
+    canvasClassName = "",
+    canvasWrapperClassName = "",
+    zoomButtonClassName = "",
+    background,
+    saveButtonTitle = "Save",
+    cancelButtonTitle = "Cancel",
+  } = props;
 
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [hasImage, setHasImage] = useState(false);
@@ -554,13 +586,38 @@ const ImageEditor = (props: IImageEditorProps) => {
   // Inject styles on mount
   useEffect(() => {
     injectStyles();
+
+    // Log customization props for debugging
+    if (
+      className ||
+      headerClassName ||
+      toolbarClassName ||
+      buttonClassName ||
+      saveButtonClassName ||
+      cancelButtonClassName ||
+      canvasClassName ||
+      zoomButtonClassName ||
+      background
+    ) {
+      console.log("ImageEditor customization props:", {
+        className,
+        headerClassName,
+        toolbarClassName,
+        buttonClassName,
+        saveButtonClassName,
+        cancelButtonClassName,
+        canvasClassName,
+        zoomButtonClassName,
+        background,
+      });
+    }
   }, []);
 
   // Handle canvas ready
 
   return (
-    <div className="image-editor-container animate-fade-in">
-      <div className="image-editor-header">
+    <div className={`image-editor-container animate-fade-in ${className}`}>
+      <div className={`image-editor-header ${headerClassName}`}>
         <Toolbar
           onAddShape={handleAddShape}
           onCropStart={handleCropStart}
@@ -581,16 +638,34 @@ const ImageEditor = (props: IImageEditorProps) => {
           canUndo={canUndo}
           canRedo={canRedo}
           onDeleteObject={handleDeleteObject}
+          showCancelButton={showCancelButton}
+          onCancel={handleCancel}
+          className={toolbarClassName}
+          buttonClassName={buttonClassName}
+          saveButtonClassName={saveButtonClassName}
+          cancelButtonClassName={cancelButtonClassName}
+          saveButtonTitle={saveButtonTitle}
+          cancelButtonTitle={cancelButtonTitle}
         />
 
         <div className="image-editor-actions">
+          {showCancelButton && (
+            <Button
+              onPress={handleCancel}
+              disabled={!hasImage}
+              color="secondary"
+              className={`image-editor-button image-editor-button-secondary hover-lift ${cancelButtonClassName}`}
+            >
+              {cancelButtonTitle}
+            </Button>
+          )}
           <Button
             onPress={handleSave}
             disabled={!hasImage}
             color="primary"
-            className="image-editor-button image-editor-button-primary hover-lift"
+            className={`image-editor-button image-editor-button-primary hover-lift ${saveButtonClassName}`}
           >
-            Save
+            {saveButtonTitle}
           </Button>
         </div>
       </div>
@@ -609,7 +684,14 @@ const ImageEditor = (props: IImageEditorProps) => {
         </div>
       )}
 
-      <CanvasEditor canvas={canvas} onCanvasReady={handleCanvasReady} />
+      <CanvasEditor
+        canvas={canvas}
+        onCanvasReady={handleCanvasReady}
+        className={canvasClassName}
+        canvasWrapperClassName={canvasWrapperClassName}
+        zoomButtonClassName={zoomButtonClassName}
+        background={background}
+      />
     </div>
   );
 };
