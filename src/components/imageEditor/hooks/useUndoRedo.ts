@@ -7,7 +7,7 @@ interface CanvasState {
 }
 
 export const useUndoRedo = (
-  canvas: fabric.Canvas | null,
+  initialCanvas: fabric.Canvas | null,
   maxHistorySize: number = 50,
   onAfterStateLoad?: () => void,
 ) => {
@@ -15,9 +15,16 @@ export const useUndoRedo = (
   const [currentIndex, setCurrentIndex] = useState(-1);
   const isUndoRedoOperation = useRef(false);
   const lastSaveTime = useRef(0);
+  const canvasRef = useRef<fabric.Canvas | null>(initialCanvas);
+
+  // Update canvas reference
+  const updateCanvas = useCallback((newCanvas: fabric.Canvas | null) => {
+    canvasRef.current = newCanvas;
+  }, []);
 
   // Save current canvas state to history
   const saveState = useCallback(() => {
+    const canvas = canvasRef.current;
     if (!canvas || isUndoRedoOperation.current) return;
 
     // Throttle saves to prevent too many states during rapid changes
@@ -65,10 +72,11 @@ export const useUndoRedo = (
       const newHistory = [...prevHistory.slice(0, currentIndex + 1), newState];
       return newHistory.length > maxHistorySize ? newHistory.slice(-maxHistorySize) : newHistory;
     });
-  }, [canvas, currentIndex, maxHistorySize]);
+  }, [currentIndex, maxHistorySize]);
 
   // Undo operation
   const undo = useCallback(() => {
+    const canvas = canvasRef.current;
     if (!canvas || currentIndex <= 0) return;
 
     isUndoRedoOperation.current = true;
@@ -89,10 +97,11 @@ export const useUndoRedo = (
     } else {
       isUndoRedoOperation.current = false;
     }
-  }, [canvas, currentIndex, history, onAfterStateLoad]);
+  }, [currentIndex, history, onAfterStateLoad]);
 
   // Redo operation
   const redo = useCallback(() => {
+    const canvas = canvasRef.current;
     if (!canvas || currentIndex >= history.length - 1) return;
 
     isUndoRedoOperation.current = true;
@@ -113,19 +122,14 @@ export const useUndoRedo = (
     } else {
       isUndoRedoOperation.current = false;
     }
-  }, [canvas, currentIndex, history, onAfterStateLoad]);
+  }, [currentIndex, history, onAfterStateLoad]);
 
-  // Clear history (useful when loading a new image)
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    setCurrentIndex(-1);
-  }, []);
-
-  // Initialize with current canvas state
+  // Initialize history with current canvas state
   const initializeHistory = useCallback(() => {
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const initialJson = JSON.stringify(
+    const canvasJson = JSON.stringify(
       canvas.toJSON([
         "id",
         "isBlurPatch",
@@ -145,29 +149,25 @@ export const useUndoRedo = (
     );
 
     const initialState: CanvasState = {
-      json: initialJson,
+      json: canvasJson,
       timestamp: Date.now(),
     };
 
     setHistory([initialState]);
     setCurrentIndex(0);
-  }, [canvas]);
+  }, []);
 
-  // Check if undo is available
+  // Check if undo/redo operations are available
   const canUndo = currentIndex > 0;
-
-  // Check if redo is available
   const canRedo = currentIndex < history.length - 1;
 
   return {
     saveState,
     undo,
     redo,
-    clearHistory,
     initializeHistory,
     canUndo,
     canRedo,
-    historyLength: history.length,
-    currentIndex,
+    updateCanvas,
   };
 };

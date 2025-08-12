@@ -211,8 +211,8 @@ export const useCropHandlers = (
       const scale = Math.min(maxWidth / croppedCanvas.width, maxHeight / croppedCanvas.height, 1);
 
       img.set({
-        originX: "center",
-        originY: "center",
+        originX: "left",
+        originY: "top",
         scaleX: scale,
         scaleY: scale,
         selectable: false,
@@ -229,8 +229,18 @@ export const useCropHandlers = (
 
       (img as CustomFabricImage).id = "originalImage";
 
+      // Calculate position to center the image manually
+      const imgScaledWidth = img.getScaledWidth();
+      const imgScaledHeight = img.getScaledHeight();
+      const centerX = (canvasWidth - imgScaledWidth) / 2;
+      const centerY = (canvasHeight - imgScaledHeight) / 2;
+
+      img.set({
+        left: centerX,
+        top: centerY,
+      });
+
       canvas.add(img);
-      canvas.centerObject(img);
       img.setCoords();
       setOriginalImage(img);
       setIsCropping(false);
