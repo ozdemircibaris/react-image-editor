@@ -10,6 +10,7 @@ import { useCropHandlers } from "./hooks/useCropHandlers";
 import { useDrawingMode } from "./hooks/useDrawingMode";
 import { useObjectHandlers } from "./hooks/useObjectHandlers";
 import { useSelectionMode } from "./hooks/useSelectionMode";
+import { useShapeHandlers } from "./hooks/useShapeHandlers";
 import { useUndoRedo } from "./hooks/useUndoRedo";
 import { Toolbar } from "./Toolbar";
 import type { CustomFabricImage } from "./types";
@@ -132,11 +133,17 @@ const ImageEditor = (props: IImageEditorProps) => {
     setOriginalImage,
   );
 
-  // Use shape handlers hook - temporarily disabled
-  const handleAddShape = () => {
-    // TODO: Implement shape handling
-    console.log("Shape handling to be implemented");
-  };
+  // Use shape handlers hook
+  const { handleAddShape } = useShapeHandlers(
+    canvas,
+    isCropping,
+    isDrawing,
+    currentColor,
+    currentStrokeWidth,
+    setIsSelectMode,
+    setSelectedObject,
+    saveState,
+  );
 
   // Use drawing mode hook
   const { handleToggleDraw } = useDrawingMode(canvas, isDrawing, setIsDrawing, setIsSelectMode, originalImage);

@@ -62,9 +62,21 @@ export const useCanvasEvents = (
     canvas.on("object:removed", handleObjectChange);
     canvas.on("path:created", handleObjectChange);
 
+    // Handle shape selection after creation
+    const handleObjectAdded = (e: fabric.IEvent<Event>) => {
+      const obj = e.target;
+      if (obj && (obj as any).isShape) {
+        // Automatically select newly added shapes
+        canvas.setActiveObject(obj);
+        saveState();
+      }
+    };
+
+    canvas.on("object:added", handleObjectAdded);
+
     return () => {
       canvas.off("object:modified", handleObjectChange);
-      canvas.off("object:added", handleObjectChange);
+      canvas.off("object:added", handleObjectAdded);
       canvas.off("object:removed", handleObjectChange);
       canvas.off("path:created", handleObjectChange);
     };

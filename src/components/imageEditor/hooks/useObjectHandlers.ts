@@ -66,7 +66,11 @@ export const useObjectHandlers = (
     (color: string) => {
       setCurrentColor(color);
       if (selectedObject) {
-        selectedObject.set({ stroke: color });
+        selectedObject.set({
+          stroke: color,
+          cornerColor: color,
+          borderColor: color,
+        });
         canvas?.renderAll();
       }
       // Update draw brush color

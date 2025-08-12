@@ -8,6 +8,8 @@ export const useShapeHandlers = (
   currentColor: string,
   currentStrokeWidth: number,
   setIsSelectMode: (value: boolean) => void,
+  setSelectedObject: (obj: fabric.Object | null) => void,
+  saveState: () => void,
 ) => {
   const handleAddShape = useCallback(
     (shapeType: "rectangle" | "circle") => {
@@ -18,8 +20,10 @@ export const useShapeHandlers = (
       const canvasWidth = canvas.getWidth();
       const canvasHeight = canvas.getHeight();
 
+      let newShape: fabric.Object;
+
       if (shapeType === "rectangle") {
-        const rect = new fabric.Rect({
+        newShape = new fabric.Rect({
           left: canvasWidth / 2,
           top: canvasHeight / 2,
           width: 100,
@@ -38,11 +42,12 @@ export const useShapeHandlers = (
           cornerSize: 8,
           transparentCorners: false,
           borderColor: currentColor,
+          // Add custom properties for identification
+          isShape: true,
+          shapeType: "rectangle",
         });
-        canvas.add(rect);
-        canvas.setActiveObject(rect);
       } else if (shapeType === "circle") {
-        const circle = new fabric.Circle({
+        newShape = new fabric.Circle({
           left: canvasWidth / 2,
           top: canvasHeight / 2,
           radius: 40,
@@ -60,14 +65,28 @@ export const useShapeHandlers = (
           cornerSize: 8,
           transparentCorners: false,
           borderColor: currentColor,
+          // Add custom properties for identification
+          isShape: true,
+          shapeType: "circle",
         });
-        canvas.add(circle);
-        canvas.setActiveObject(circle);
+      } else {
+        return;
       }
 
+      // Add the shape to canvas
+      canvas.add(newShape);
+
+      // Set as active object and update selection
+      canvas.setActiveObject(newShape);
+      setSelectedObject(newShape);
+
+      // Save state for undo/redo
+      saveState();
+
+      // Render canvas
       canvas.renderAll();
     },
-    [canvas, isCropping, isDrawing, currentColor, currentStrokeWidth, setIsSelectMode],
+    [canvas, isCropping, isDrawing, currentColor, currentStrokeWidth, setIsSelectMode, setSelectedObject, saveState],
   );
 
   return {

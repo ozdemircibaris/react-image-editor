@@ -8,6 +8,8 @@ export interface CustomFabricObject extends fabric.Object {
   blurRectId?: string;
   stroke?: string;
   strokeWidth?: number;
+  isShape?: boolean;
+  shapeType?: "rectangle" | "circle";
 }
 
 export interface CustomFabricImage extends fabric.Image {
