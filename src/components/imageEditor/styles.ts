@@ -8,6 +8,7 @@ export const imageEditorStyles = `
   flex-direction: column;
   background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #000000 100%);
   color: white;
+  overflow: hidden; /* Scroll bar'ı engelle */
 }
 
 /* Ensure custom background classes can override the default gradient */
@@ -846,6 +847,123 @@ export const imageEditorStyles = `
 
 .image-editor-actions .image-editor-button[class*="border-"] {
   border: inherit !important;
+}
+
+/* ===== MOBILE RESPONSIVE STYLES ===== */
+
+/* Mobile: 320px - 768px */
+@media (max-width: 768px) {
+  /* Container mobile height */
+  .image-editor-container {
+    height: 100vh;
+    min-height: 100vh;
+    max-height: 100vh;
+  }
+  
+  /* Toolbar mobile layout - sadece gerekli yerlerde alt alta */
+  .toolbar {
+    flex-wrap: wrap; /* Wrap yap ama column yapma */
+    gap: 0.5rem;
+    padding: 0.5rem;
+    justify-content: center;
+  }
+  
+  .toolbar-button {
+    width: 2.75rem; /* Çok büyütme */
+    height: 2.75rem;
+  }
+  
+  /* Header mobile layout - sadece çok dar ekranlarda */
+  .image-editor-header {
+    flex-direction: row; /* Yan yana bırak */
+    gap: 0.5rem; /* Daha az gap */
+    padding: 0.75rem; /* Daha az padding */
+    flex-wrap: wrap; /* Gerekirse wrap yap */
+  }
+  
+  .image-editor-actions {
+    gap: 0.5rem;
+  }
+  
+  .image-editor-button {
+    padding: 0.5rem 1rem; /* Daha küçük padding */
+    font-size: 0.85rem;
+  }
+  
+  /* Canvas mobile size */
+  .canvas-container {
+    padding: 0.5rem; /* Desktop'taki 1rem'i mobile'da azalt */
+  }
+  
+  .canvas-wrapper {
+    max-width: calc(100vw - 8px) !important; /* Desktop'taki 200px'i override et */
+    max-height: calc(100vh - 80px) !important; /* Desktop'taki 200px'i override et */
+    margin: 0 4px !important;
+  }
+  
+  /* Zoom buttons mobile */
+  .zoom-button {
+    width: 36px; /* Daha küçük */
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  /* Color palette mobile */
+  .color-palette {
+    min-width: 220px;
+    padding: 0.5rem;
+  }
+  
+  /* Width slider mobile */
+  .width-slider {
+    min-width: 220px;
+    padding: 0.5rem;
+  }
+  
+  /* Crop mode mobile */
+  .crop-mode {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  /* Space hint mobile */
+  .canvas-wrapper .animate-fade-in {
+    display: none; /* Mobile'da space hint'i gizle */
+  }
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  
+  .toolbar-button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  
+  .canvas-wrapper {
+    max-width: calc(100vw - 100px);
+    max-height: calc(100vh - 180px);
+  }
+}
+
+/* Large screens: 1024px+ */
+@media (min-width: 1024px) {
+  .toolbar {
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  
+  .image-editor-header {
+    flex-direction: row;
+    gap: 0;
+    padding: 1rem 1.5rem;
+  }
 }
 `;
 

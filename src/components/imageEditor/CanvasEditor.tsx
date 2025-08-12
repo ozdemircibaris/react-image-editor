@@ -24,29 +24,80 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
 
   // Calculate responsive canvas size
   const calculateCanvasSize = useCallback(() => {
-    const maxWidth = Math.max(0, window.innerWidth - 200); // 100px margin on each side
-    const maxHeight = Math.max(0, window.innerHeight - 200); // 100px margin top/bottom
+    const isMobile = window.innerWidth <= 768;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
 
-    // Maintain 16:9 aspect ratio for horizontal layout
-    const aspectRatio = 16 / 9;
+    if (isMobile) {
+      // Mobile: iPhone XR için çok agresif boyutlandırma
+      const maxWidth = Math.max(0, window.innerWidth - 8); // 4px margin on each side (canvas-container padding dahil)
+      const maxHeight = Math.max(0, window.innerHeight - 80); // Header + margins - çok minimal margin
 
-    let width = maxWidth;
-    let height = width / aspectRatio;
+      // Mobile'da kare aspect ratio (en iyi mobile UX)
+      const aspectRatio = 1; // 1:1 ratio - mobile'da en iyi
 
-    // If height exceeds maxHeight, recalculate based on height
-    if (height > maxHeight) {
-      height = maxHeight;
-      width = height * aspectRatio;
+      let width = maxWidth;
+      let height = width / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+
+      // Mobile'da çok küçük minimum boyutlar
+      const minWidth = 200;
+      const minHeight = 120;
+
+      width = Math.max(width, minWidth);
+      height = Math.max(height, minHeight);
+
+      return { width: Math.floor(width), height: Math.floor(height) };
+    } else if (isTablet) {
+      // Tablet: Medium margins, 16:9 aspect ratio
+      const maxWidth = Math.max(0, window.innerWidth - 100); // 50px margin on each side
+      const maxHeight = Math.max(0, window.innerHeight - 180); // Header + margins
+
+      const aspectRatio = 16 / 9;
+
+      let width = maxWidth;
+      let height = width / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+
+      // Tablet minimum size
+      const minWidth = 600;
+      const minHeight = 338;
+
+      width = Math.max(width, minWidth);
+      height = Math.max(height, minHeight);
+
+      return { width: Math.floor(width), height: Math.floor(height) };
+    } else {
+      // Desktop: Large margins, 16:9 aspect ratio
+      const maxWidth = Math.max(0, window.innerWidth - 200); // 100px margin on each side
+      const maxHeight = Math.max(0, window.innerHeight - 200); // Header + margins
+
+      const aspectRatio = 16 / 9;
+
+      let width = maxWidth;
+      let height = width / aspectRatio;
+
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+
+      // Desktop minimum size
+      const minWidth = 800;
+      const minHeight = 450;
+
+      width = Math.max(width, minWidth);
+      height = Math.max(height, minHeight);
+
+      return { width: Math.floor(width), height: Math.floor(height) };
     }
-
-    // Ensure minimum size
-    const minWidth = 800;
-    const minHeight = 450;
-
-    width = Math.max(width, minWidth);
-    height = Math.max(height, minHeight);
-
-    return { width: Math.floor(width), height: Math.floor(height) };
   }, []);
 
   useEffect(() => {
@@ -263,8 +314,8 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
           </div>
         )}
 
-        {/* Space to pan hint */}
-        {isReady && !isSpaceDown && (
+        {/* Space to pan hint - hidden on mobile */}
+        {isReady && !isSpaceDown && window.innerWidth > 768 && (
           <div
             style={{
               position: "absolute",
