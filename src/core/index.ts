@@ -73,6 +73,10 @@ export {
   createThrottledFunction,
   safeRequestAnimationFrame,
   addTrackedEventListener,
+  // Validation utilities
+  SUPPORTED_IMAGE_TYPES,
+  validateImageFile,
+  createValidatedImageURL,
 } from "./utils";
 
 // ============================================================================
@@ -119,3 +123,9 @@ export type {
   ToolbarRenderProps,
   CanvasRenderProps,
 } from "./types";
+
+// Validation types
+export type {
+  SupportedImageType,
+  ImageValidationResult,
+} from "./utils";
