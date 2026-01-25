@@ -8,6 +8,7 @@ export { useBlur } from "./useBlur";
 export { useCrop } from "./useCrop";
 export { useDrawing } from "./useDrawing";
 export { useShapes } from "./useShapes";
+export { useText } from "./useText";
 export { useSelection } from "./useSelection";
 export { useZoom } from "./useZoom";
 export { useExport } from "./useExport";
