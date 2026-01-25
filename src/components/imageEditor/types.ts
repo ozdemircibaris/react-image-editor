@@ -1,52 +1,35 @@
-import { fabric } from "fabric";
+/**
+ * Type definitions for the ImageEditor component
+ *
+ * Note: Core types are now in @ozdemircibaris/react-image-editor/core
+ * These types are re-exported for backward compatibility
+ */
 
-// Extended Fabric.js types for our custom properties
-export interface CustomFabricObject extends fabric.Object {
-  id?: string;
-  isDrawing?: boolean;
-  isBlurPatch?: boolean;
-  blurRectId?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  isShape?: boolean;
-  shapeType?: "rectangle" | "circle";
-}
+// Re-export core types for backward compatibility
+export type {
+  EditorFabricObject as CustomFabricObject,
+  EditorFabricImage as CustomFabricImage,
+  EditorFabricCanvas as CustomFabricCanvas,
+  EditorFabricRect as CustomFabricRect,
+  EditorFabricPath as CustomFabricPath,
+  FabricSelectionEvent,
+  FabricPathCreatedEvent,
+  ShapeType,
+  ImageEditorClassNames as ImageEditorCustomization,
+} from "../../core/types";
 
-export interface CustomFabricImage extends fabric.Image {
-  id?: string;
-}
+// Legacy hook return types (deprecated - use core hooks directly)
+// Kept for backward compatibility
+import type { fabric } from "fabric";
 
-export interface CustomFabricCanvas extends fabric.Canvas {
-  isUpdatingBlur?: boolean;
-}
-
-export interface CustomFabricRect extends fabric.Rect {
-  id?: string;
-  isBlurPatch?: boolean;
-  blurRectId?: string;
-}
-
-export interface CustomFabricPath extends fabric.Path {
-  isDrawing?: boolean;
-}
-
-// Event types
-export interface FabricSelectionEvent {
-  selected?: fabric.Object[];
-  deselected?: fabric.Object[];
-}
-
-export interface FabricPathCreatedEvent {
-  path?: fabric.Path;
-}
-
-// Hook return types
+/** @deprecated Use UseBlurReturn from core instead */
 export interface UseBlurHandlersReturn {
   activeBlurRects: fabric.Rect[];
   setActiveBlurRects: React.Dispatch<React.SetStateAction<fabric.Rect[]>>;
   handleAddBlur: () => void;
 }
 
+/** @deprecated Use UseCropReturn from core instead */
 export interface UseCropHandlersReturn {
   isCropping: boolean;
   setIsCropping: React.Dispatch<React.SetStateAction<boolean>>;
@@ -55,10 +38,12 @@ export interface UseCropHandlersReturn {
   handleCropCancel: () => void;
 }
 
+/** @deprecated Use UseShapesReturn from core instead */
 export interface UseShapeHandlersReturn {
   handleAddShape: (shapeType: "rectangle" | "circle") => void;
 }
 
+/** @deprecated Use UseHistoryReturn from core instead */
 export interface UseUndoRedoReturn {
   saveState: () => void;
   undo: () => void;
@@ -66,21 +51,4 @@ export interface UseUndoRedoReturn {
   initializeHistory: () => void;
   canUndo: boolean;
   canRedo: boolean;
-}
-
-// Customization types
-export interface ImageEditorCustomization {
-  showCancelButton?: boolean;
-  className?: string;
-  headerClassName?: string;
-  toolbarClassName?: string;
-  buttonClassName?: string;
-  saveButtonClassName?: string;
-  cancelButtonClassName?: string;
-  canvasClassName?: string;
-  canvasWrapperClassName?: string;
-  zoomButtonClassName?: string;
-  background?: string;
-  saveButtonTitle?: string;
-  cancelButtonTitle?: string;
 }

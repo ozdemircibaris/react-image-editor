@@ -1,5 +1,6 @@
 import { fabric } from "fabric";
 import { useEffect, useRef, useCallback, useState } from "react";
+import { calculateCanvasSize, animateZoomTo } from "../../core/utils/canvas";
 
 interface CanvasProps {
   canvas: fabric.Canvas | null;
@@ -22,89 +23,26 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
   const [isReady, setIsReady] = useState(false);
   const [isSpaceDown, setIsSpaceDown] = useState(false);
 
-  // Calculate responsive canvas size
-  const calculateCanvasSize = useCallback(() => {
-    const isMobile = window.innerWidth <= 768;
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
-
-    if (isMobile) {
-      // Mobile: iPhone XR için çok agresif boyutlandırma
-      const maxWidth = Math.max(0, window.innerWidth - 8); // 4px margin on each side (canvas-container padding dahil)
-      const maxHeight = Math.max(0, window.innerHeight - 80); // Header + margins - çok minimal margin
-
-      // Mobile'da kare aspect ratio (en iyi mobile UX)
-      const aspectRatio = 1; // 1:1 ratio - mobile'da en iyi
-
-      let width = maxWidth;
-      let height = width / aspectRatio;
-
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-      }
-
-      // Mobile'da çok küçük minimum boyutlar
-      const minWidth = 200;
-      const minHeight = 120;
-
-      width = Math.max(width, minWidth);
-      height = Math.max(height, minHeight);
-
-      return { width: Math.floor(width), height: Math.floor(height) };
-    } else if (isTablet) {
-      // Tablet: Medium margins, 16:9 aspect ratio
-      const maxWidth = Math.max(0, window.innerWidth - 100); // 50px margin on each side
-      const maxHeight = Math.max(0, window.innerHeight - 180); // Header + margins
-
-      const aspectRatio = 16 / 9;
-
-      let width = maxWidth;
-      let height = width / aspectRatio;
-
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-      }
-
-      // Tablet minimum size
-      const minWidth = 600;
-      const minHeight = 338;
-
-      width = Math.max(width, minWidth);
-      height = Math.max(height, minHeight);
-
-      return { width: Math.floor(width), height: Math.floor(height) };
-    } else {
-      // Desktop: Large margins, 16:9 aspect ratio
-      const maxWidth = Math.max(0, window.innerWidth - 200); // 100px margin on each side
-      const maxHeight = Math.max(0, window.innerHeight - 200); // Header + margins
-
-      const aspectRatio = 16 / 9;
-
-      let width = maxWidth;
-      let height = width / aspectRatio;
-
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-      }
-
-      // Desktop minimum size
-      const minWidth = 800;
-      const minHeight = 450;
-
-      width = Math.max(width, minWidth);
-      height = Math.max(height, minHeight);
-
-      return { width: Math.floor(width), height: Math.floor(height) };
-    }
+  // Calculate responsive canvas size using core utility
+  const getCanvasSize = useCallback(() => {
+    return calculateCanvasSize(window.innerWidth, window.innerHeight, {
+      mobileBreakpoint: 768,
+      tabletBreakpoint: 1024,
+      mobileMargin: 4,
+      tabletMargin: 50,
+      desktopMargin: 100,
+      mobileAspectRatio: 1,
+      defaultAspectRatio: 16 / 9,
+      minWidth: 200,
+      minHeight: 120,
+    });
   }, []);
 
   useEffect(() => {
     if (!canvasRef.current || canvas) return;
 
     const timeout = setTimeout(() => {
-      const { width, height } = calculateCanvasSize();
+      const { width, height } = getCanvasSize();
 
       const fabricCanvas = new fabric.Canvas(canvasRef.current!);
       fabricCanvas.setWidth(width);
@@ -130,13 +68,13 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
         }
       }
     };
-  }, [canvas, onCanvasReady, calculateCanvasSize, background]);
+  }, [canvas, onCanvasReady, getCanvasSize, background]);
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       if (canvas) {
-        const { width, height } = calculateCanvasSize();
+        const { width, height } = getCanvasSize();
         canvas.setWidth(width);
         canvas.setHeight(height);
         canvas.renderAll();
@@ -147,52 +85,20 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [canvas, calculateCanvasSize]);
+  }, [canvas, getCanvasSize]);
 
-  // Smooth zoom implementation
-  const clampZoom = (zoomValue: number) => {
-    const MIN_ZOOM = 0.2;
-    const MAX_ZOOM = 4;
-    return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomValue));
-  };
-
-  const animateZoomTo = useCallback(
-    (targetZoom: number, durationMs: number = 220) => {
-      if (!canvas) return;
-      const clampedTarget = clampZoom(targetZoom);
-      const startZoom = canvas.getZoom();
-      const startTime = performance.now();
-
-      const centerPoint = new fabric.Point(canvas.getWidth() / 2, canvas.getHeight() / 2);
-
-      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-      const step = (now: number) => {
-        const elapsed = now - startTime;
-        const t = Math.min(1, elapsed / durationMs);
-        const eased = easeOutCubic(t);
-        const currentZoom = startZoom + (clampedTarget - startZoom) * eased;
-        canvas.zoomToPoint(centerPoint, currentZoom);
-        canvas.requestRenderAll();
-        if (t < 1) requestAnimationFrame(step);
-      };
-
-      requestAnimationFrame(step);
-    },
-    [canvas],
-  );
-
+  // Zoom handlers using core utility
   const handleZoomIn = useCallback(() => {
     if (!canvas) return;
     const current = canvas.getZoom();
-    animateZoomTo(current * 1.2);
-  }, [canvas, animateZoomTo]);
+    animateZoomTo(canvas, current * 1.2);
+  }, [canvas]);
 
   const handleZoomOut = useCallback(() => {
     if (!canvas) return;
     const current = canvas.getZoom();
-    animateZoomTo(current / 1.2);
-  }, [canvas, animateZoomTo]);
+    animateZoomTo(canvas, current / 1.2);
+  }, [canvas]);
 
   // Enable panning with Space+Drag and prevent page scroll on Space
   useEffect(() => {

@@ -1,15 +1,33 @@
 {
   "name": "@ozdemircibaris/react-image-editor",
   "private": false,
-  "version": "1.1.1",
-  "description": "Professional React image editor component with blur, crop, shapes, drawing, and undo/redo functionality. Built with Fabric.js and modern React patterns.",
+  "version": "1.2.0",
+  "description": "Headless React image editor with blur, crop, shapes, drawing, and undo/redo. Use the hooks for custom UI or the styled components for quick integration.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.esm.js",
+      "require": "./dist/core/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "core": ["./dist/core/index.d.ts"]
+    }
+  },
   "files": [
     "dist",
     "README.md"
   ],
+  "sideEffects": false,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -21,6 +39,8 @@
   "keywords": [
     "react",
     "image-editor",
+    "headless",
+    "hooks",
     "fabric.js",
     "canvas",
     "blur",
@@ -31,7 +51,8 @@
     "image-processing",
     "photo-editor",
     "web-editor",
-    "typescript"
+    "typescript",
+    "unstyled"
   ],
   "author": "Baris Ozdemirci",
   "license": "MIT",
