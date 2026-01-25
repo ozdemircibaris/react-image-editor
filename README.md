@@ -1,94 +1,55 @@
 # React Image Editor
 
-Professional image editing made simple with a powerful React component built on modern web technologies.
+A professional image editing library for React applications with both headless and styled component options.
 
-[![Demo](https://img.shields.io/badge/Demo-Live%20Preview-blue?style=for-the-badge)](https://image-editor.ozdemircibaris.dev)
-[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Demo](https://img.shields.io/badge/Demo-Live%20Preview-blue?style=flat-square)](https://image-editor.ozdemircibaris.dev)
+[![npm](https://img.shields.io/npm/v/@ozdemircibaris/react-image-editor?style=flat-square)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://opensource.org/licenses/MIT)
 
-## ✨ Features
+## Features
 
-- 🧩 **Headless Mode** - Use hooks for complete UI control, or use styled components for quick setup
-- 🎨 **Professional Image Editing** - Load and edit images with intuitive tools
-- 🔍 **Smart Blur Tool** - Add selective blur effects to specific areas
-- ✂️ **Precise Crop Tool** - Crop images with pixel-perfect accuracy
-- 🔷 **Shape Tools** - Add rectangles and circles with custom styling
-- ✏️ **Drawing Mode** - Free-hand drawing with customizable brush settings
-- ↩️ **Undo/Redo System** - Full history management with keyboard shortcuts
-- 🎯 **Selection Mode** - Intuitive object selection and manipulation
-- 🎨 **Color & Stroke Control** - Customizable colors and stroke widths
-- ⌨️ **Keyboard Shortcuts** - Professional workflow with Ctrl+Z, Ctrl+Y, Delete
-- 🎛️ **Customizable UI** - Fully customizable styling with CSS classes
-- ❌ **Optional Cancel Button** - Configurable cancel functionality
+- **Headless Mode** - Full control over UI with React hooks
+- **Styled Components** - Ready-to-use components for quick setup
+- **Blur Tool** - Add selective blur effects to specific areas
+- **Crop Tool** - Pixel-perfect image cropping
+- **Shape Tools** - Rectangles and circles with custom styling
+- **Drawing Mode** - Free-hand drawing with customizable brush
+- **Undo/Redo** - Full history management with keyboard shortcuts
+- **Zoom & Pan** - Navigate large images with ease
+- **Original Resolution Export** - Exports maintain original image dimensions
+- **MIME Type Validation** - Validate image files before loading
+- **Base64 Support** - Load and export images as data URLs
 
-## 🚀 Live Demo
-
-**Try it now:** [https://image-editor.ozdemircibaris.dev](https://image-editor.ozdemircibaris.dev)
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install @ozdemircibaris/react-image-editor
-# or
-yarn add @ozdemircibaris/react-image-editor
-# or
-pnpm add @ozdemircibaris/react-image-editor
 ```
 
-## 🎯 Quick Start
+## Quick Start
 
-```jsx
-import React, { useState } from "react";
+### Styled Component
+
+```tsx
 import { ImageEditor } from "@ozdemircibaris/react-image-editor";
 
 function App() {
-  const [imageUrl, setImageUrl] = useState("");
-
-  const handleImageSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setImageUrl(url);
-    }
-  };
-
-  const handleSave = (imageBlob) => {
-    // Handle the saved image blob
-    const url = URL.createObjectURL(imageBlob);
-    console.log("Saved image URL:", url);
-
-    // You can also download the image
-    const downloadLink = document.createElement("a");
-    downloadLink.href = url;
-    downloadLink.download = "edited-image.png";
-    downloadLink.click();
-  };
-
-  const handleCancel = () => {
-    console.log("Editing cancelled");
-    setImageUrl(""); // Reset image
+  const handleSave = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    // Download or upload the image
   };
 
   return (
-    <div>
-      {!imageUrl ? (
-        <div className="image-picker">
-          <input type="file" accept="image/*" onChange={handleImageSelect} className="file-input" />
-          <p>Select an image to start editing</p>
-        </div>
-      ) : (
-        <ImageEditor imageUrl={imageUrl} onSave={handleSave} onCancel={handleCancel} />
-      )}
-    </div>
+    <ImageEditor
+      imageUrl="/path/to/image.jpg"
+      onSave={handleSave}
+      onCancel={() => console.log("Cancelled")}
+    />
   );
 }
-
-export default App;
 ```
 
-## 🎯 Headless Mode (v1.2.0+)
-
-For complete control over your UI, use the headless hooks from `/core`:
+### Headless Mode
 
 ```tsx
 import { useImageEditor } from "@ozdemircibaris/react-image-editor/core";
@@ -102,41 +63,32 @@ function CustomEditor({ imageUrl }: { imageUrl: string }) {
 
   return (
     <div>
-      {/* Your custom canvas container */}
-      <canvas ref={editor.bindCanvas} />
+      <canvas ref={editor.canvasRef} />
 
-      {/* Your custom toolbar */}
-      <button onClick={() => editor.blur.add()}>Add Blur</button>
-      <button onClick={() => editor.crop.start()}>Crop</button>
-      <button onClick={() => editor.shapes.add("rectangle")}>Rectangle</button>
-      <button onClick={() => editor.shapes.add("circle")}>Circle</button>
-      <button onClick={() => editor.drawing.toggle()}>
-        {editor.drawing.isActive ? "Stop Drawing" : "Draw"}
-      </button>
-      <button onClick={editor.history.undo} disabled={!editor.history.canUndo}>
-        Undo
-      </button>
-      <button onClick={editor.history.redo} disabled={!editor.history.canRedo}>
-        Redo
-      </button>
+      <div>
+        <button onClick={() => editor.blur.add()}>Add Blur</button>
+        <button onClick={() => editor.crop.start()}>Crop</button>
+        <button onClick={() => editor.shapes.add("rectangle")}>Rectangle</button>
+        <button onClick={() => editor.drawing.toggle()}>Draw</button>
+        <button onClick={editor.history.undo} disabled={!editor.history.canUndo}>
+          Undo
+        </button>
+        <button onClick={editor.history.redo} disabled={!editor.history.canRedo}>
+          Redo
+        </button>
+      </div>
 
-      {/* Crop controls */}
       {editor.crop.isActive && (
         <div>
-          <button onClick={() => editor.crop.apply()}>Apply Crop</button>
-          <button onClick={() => editor.crop.cancel()}>Cancel Crop</button>
+          <button onClick={() => editor.crop.apply()}>Apply</button>
+          <button onClick={() => editor.crop.cancel()}>Cancel</button>
         </div>
       )}
 
-      {/* Save */}
-      <button
-        onClick={async () => {
-          const blob = await editor.exportToBlob();
-          if (blob) {
-            // Handle the blob
-          }
-        }}
-      >
+      <button onClick={async () => {
+        const blob = await editor.exportToBlob();
+        // Handle the blob
+      }}>
         Save
       </button>
     </div>
@@ -144,162 +96,136 @@ function CustomEditor({ imageUrl }: { imageUrl: string }) {
 }
 ```
 
+## Image Validation
+
+Validate image files by MIME type before loading:
+
+```tsx
+import {
+  validateImageFile,
+  createValidatedImageURL,
+  SUPPORTED_IMAGE_TYPES,
+} from "@ozdemircibaris/react-image-editor/core";
+
+// Option 1: Validate file directly
+const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const result = validateImageFile(file);
+  if (!result.valid) {
+    alert(result.error);
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  setImageUrl(url);
+};
+
+// Option 2: Validate and create URL in one step
+const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  const { url, error } = createValidatedImageURL(file);
+
+  if (!url) {
+    alert(error);
+    return;
+  }
+
+  setImageUrl(url);
+};
+
+// Custom allowed types
+const result = validateImageFile(file, ["image/jpeg", "image/png"]);
+```
+
+**Supported MIME types:** jpeg, png, gif, webp, svg+xml, bmp
+
+## Export Options
+
+```tsx
+// Export as Blob (original resolution)
+const blob = await editor.exportToBlob();
+
+// Export as Base64 data URL
+const dataUrl = editor.exportToDataURL("png", 1);
+```
+
+Exports preserve the original image dimensions. If you load a 1920x1080 image, the export will be 1920x1080 regardless of canvas display size.
+
+## API Reference
+
+### useImageEditor Config
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `imageUrl` | `string` | `""` | URL of the image to load |
+| `width` | `number` | auto | Canvas width |
+| `height` | `number` | auto | Canvas height |
+| `defaultColor` | `string` | `"#ff7000"` | Default color for shapes/drawing |
+| `defaultStrokeWidth` | `number` | `2` | Default stroke width |
+| `maxHistorySize` | `number` | `50` | Max undo/redo steps |
+| `blurIntensity` | `number` | `20` | Blur effect intensity |
+
 ### useImageEditor Return Value
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `canvas` | `fabric.Canvas \| null` | The Fabric.js canvas instance |
-| `bindCanvas` | `(el: HTMLCanvasElement) => void` | Ref callback to bind canvas element |
-| `hasImage` | `boolean` | Whether an image is loaded |
-| `state` | `EditorState` | Current editor state |
-| `history` | `UseHistoryReturn` | Undo/redo controls |
-| `blur` | `UseBlurReturn` | Blur tool controls |
-| `crop` | `UseCropReturn` | Crop tool controls |
-| `drawing` | `UseDrawingReturn` | Drawing mode controls |
-| `shapes` | `UseShapesReturn` | Shape tools |
-| `selection` | `UseSelectionReturn` | Selection controls |
-| `style` | `UseStyleReturn` | Color and stroke controls |
-| `zoom` | `UseZoomReturn` | Zoom controls |
-| `exportToBlob` | `() => Promise<Blob \| null>` | Export canvas to blob |
-| `dispose` | `() => void` | Cleanup resources |
+| Property | Description |
+|----------|-------------|
+| `canvas` | Fabric.js canvas instance |
+| `canvasRef` | Callback ref for canvas element |
+| `hasImage` | Whether an image is loaded |
+| `history.undo()` | Undo last action |
+| `history.redo()` | Redo last undone action |
+| `history.canUndo` | Whether undo is available |
+| `history.canRedo` | Whether redo is available |
+| `blur.add()` | Add a blur region |
+| `blur.clearAll()` | Remove all blur regions |
+| `crop.start()` | Enter crop mode |
+| `crop.apply()` | Apply the crop |
+| `crop.cancel()` | Cancel crop mode |
+| `crop.isActive` | Whether crop mode is active |
+| `drawing.enable()` | Enable drawing mode |
+| `drawing.disable()` | Disable drawing mode |
+| `drawing.toggle()` | Toggle drawing mode |
+| `drawing.isActive` | Whether drawing is active |
+| `shapes.add(type)` | Add a shape ("rectangle" or "circle") |
+| `selection.enable()` | Enable selection mode |
+| `selection.deleteSelected()` | Delete selected object |
+| `style.color` | Current color |
+| `style.setColor(color)` | Set color |
+| `style.strokeWidth` | Current stroke width |
+| `style.setStrokeWidth(width)` | Set stroke width |
+| `zoom.in()` | Zoom in |
+| `zoom.out()` | Zoom out |
+| `zoom.level` | Current zoom level |
+| `exportToBlob()` | Export canvas as Blob |
+| `exportToDataURL(format, quality)` | Export as data URL |
+| `dispose()` | Clean up resources |
 
-## 🔧 API Reference
+### ImageEditor Props (Styled Component)
 
-### Props
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `imageUrl` | `string` | Yes | Image URL to edit |
+| `onSave` | `(blob: Blob) => void` | Yes | Save callback |
+| `onCancel` | `() => void` | Yes | Cancel callback |
+| `showCancelButton` | `boolean` | No | Show cancel button |
+| `className` | `string` | No | Container class |
+| `background` | `string` | No | Canvas background color |
 
-| Prop                     | Type                        | Required | Default         | Description                               |
-| ------------------------ | --------------------------- | -------- | --------------- | ----------------------------------------- |
-| `imageUrl`               | `string`                    | Yes      | -               | URL of the image to edit                  |
-| `onSave`                 | `(imageBlob: Blob) => void` | Yes      | -               | Callback when image is saved              |
-| `onCancel`               | `() => void`                | Yes      | -               | Callback when editing is cancelled        |
-| `showCancelButton`       | `boolean`                   | No       | `false`         | Whether to show the cancel button         |
-| `className`              | `string`                    | No       | `""`            | Custom CSS class for the main container   |
-| `headerClassName`        | `string`                    | No       | `""`            | Custom CSS class for the header           |
-| `toolbarClassName`       | `string`                    | No       | `""`            | Custom CSS class for the toolbar          |
-| `buttonClassName`        | `string`                    | No       | `""`            | Custom CSS class for toolbar buttons      |
-| `saveButtonClassName`    | `string`                    | No       | `""`            | Custom CSS class for the save button      |
-| `cancelButtonClassName`  | `string`                    | No       | `""`            | Custom CSS class for the cancel button    |
-| `canvasClassName`        | `string`                    | No       | `""`            | Custom CSS class for the canvas container |
-| `canvasWrapperClassName` | `string`                    | No       | `""`            | Custom CSS class for the canvas wrapper   |
-| `zoomButtonClassName`    | `string`                    | No       | `""`            | Custom CSS class for zoom buttons         |
-| `background`             | `string`                    | No       | `"transparent"` | Custom background color for canvas        |
-| `saveButtonTitle`        | `string`                    | No       | `"Save"`        | Custom text for the save button           |
-| `cancelButtonTitle`      | `string`                    | No       | `"Cancel"`      | Custom text for the cancel button         |
+## Keyboard Shortcuts
 
-### Available Tools
+- `Ctrl/Cmd + Z` - Undo
+- `Ctrl/Cmd + Y` - Redo
+- `Delete/Backspace` - Delete selected object
+- `Space + Drag` - Pan canvas
 
-- **Selection Mode** - Select and manipulate objects
-- **Drawing Mode** - Free-hand drawing with customizable brush
-- **Blur Tool** - Add selective blur effects
-- **Crop Tool** - Precise image cropping
-- **Shape Tools** - Add rectangles and circles
-- **Undo/Redo** - Full operation history with keyboard shortcuts
+## License
 
-### Customization Examples
+MIT
 
-#### Basic Customization
+## Links
 
-```jsx
-<ImageEditor
-  imageUrl={imageUrl}
-  onSave={handleSave}
-  onCancel={handleCancel}
-  showCancelButton={true}
-  className="my-custom-editor"
-  background="#f0f0f0"
-/>
-```
-
-#### Advanced Styling with Tailwind CSS
-
-```jsx
-<ImageEditor
-  imageUrl={imageUrl}
-  onSave={handleSave}
-  onCancel={handleCancel}
-  showCancelButton={true}
-  headerClassName="bg-gradient-to-r from-purple-500 to-pink-500"
-  toolbarClassName="border-2 border-blue-300 rounded-lg"
-  buttonClassName="bg-blue-500 hover:bg-blue-600 text-white"
-  saveButtonClassName="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full"
-  cancelButtonClassName="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full"
-  canvasClassName="border-4 border-dashed border-gray-400"
-  canvasWrapperClassName="shadow-2xl border-4 border-purple-300"
-  zoomButtonClassName="bg-yellow-500 hover:bg-yellow-600 text-black"
-  saveButtonTitle="Save"
-  cancelButtonTitle="Cancel"
-/>
-```
-
-#### Custom CSS Classes
-
-```jsx
-<ImageEditor
-  imageUrl={imageUrl}
-  onSave={handleSave}
-  onCancel={handleCancel}
-  showCancelButton={true}
-  className="custom-theme"
-  toolbarClassName="custom-toolbar"
-  buttonClassName="custom-button"
-  saveButtonClassName="custom-save-button"
-  cancelButtonClassName="custom-cancel-button"
-  zoomButtonClassName="custom-zoom-button"
-  saveButtonTitle="💾 Save Image"
-  cancelButtonTitle="❌ Cancel"
-/>
-```
-
-#### Active State Customization
-
-```jsx
-<ImageEditor
-  imageUrl={imageUrl}
-  onSave={handleSave}
-  onCancel={handleCancel}
-  showCancelButton={true}
-  // Customize active state of toolbar buttons
-  buttonClassName="[&.active]:bg-red-500 [&.active]:border-red-600 [&.active]:text-white"
-  // Or use custom CSS classes
-  // buttonClassName="custom-active-button"
-/>
-```
-
-## 🚀 Coming Soon
-
-- **📝 Text Tool** - Add and edit text on images
-- **➡️ Arrow Tool** - Draw arrows and lines
-- **📱 Mobile UI** - Optimized interface for mobile devices
-- **🎨 Filters** - Instagram-style filters and effects
-- **🤖 AI Tools** - Background removal and object recognition
-
-## 🛠️ Development
-
-```bash
-# Clone and setup
-git clone https://github.com/ozdemircibaris/react-image-editor.git
-cd react-image-editor
-npm install
-
-# Start development server
-npm run dev
-
-# Build library
-npm run build:lib
-```
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 📞 Support
-
-- **Demo**: [https://image-editor.ozdemircibaris.dev](https://image-editor.ozdemircibaris.dev)
-- **Issues**: [GitHub Issues](https://github.com/ozdemircibaris/react-image-editor/issues)
-
----
-
-Built with ❤️ by [@ozdemircibaris](https://github.com/ozdemircibaris)
-
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/ozdemircibaris/react-image-editor)
-[![NPM](https://img.shields.io/badge/NPM-Package-red?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
+- [Live Demo](https://image-editor.ozdemircibaris.dev)
+- [GitHub](https://github.com/ozdemircibaris/react-image-editor)
+- [npm](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
