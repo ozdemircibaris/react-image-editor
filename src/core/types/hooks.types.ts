@@ -156,8 +156,6 @@ export interface UseZoomReturn {
   setZoom: (level: number) => void;
   /** Reset zoom to 1 */
   resetZoom: () => void;
-  /** Fit image to canvas */
-  fitToCanvas: () => void;
 }
 
 /**

@@ -42,11 +42,11 @@ export function useExport(
     const image = originalImageRef.current;
     if (!canvas || !image) return null;
 
-    try {
-      // Store viewport state
-      const currentVPT = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
-      const currentZoom = canvas.getZoom();
+    // Store viewport state for restoration
+    const currentVPT = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    const currentZoom = canvas.getZoom();
 
+    try {
       // Reset viewport for accurate export
       canvas.setZoom(1);
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
@@ -98,6 +98,10 @@ export function useExport(
 
       return await dataURLToBlob(dataURL);
     } catch {
+      // Restore viewport state on error to prevent corrupted canvas state
+      canvas.setZoom(currentZoom);
+      canvas.setViewportTransform(currentVPT);
+      canvas.renderAll();
       return null;
     }
   }, [canvasRef, originalImageRef]);
