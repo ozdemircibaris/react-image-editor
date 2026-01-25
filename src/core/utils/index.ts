@@ -38,3 +38,14 @@ export {
   limitCropRectScale,
   calculateCropCoordinates,
 } from "./crop";
+
+// Validation utilities
+export {
+  SUPPORTED_IMAGE_TYPES,
+  validateImageFile,
+  createValidatedImageURL,
+} from "./validation";
+export type {
+  SupportedImageType,
+  ImageValidationResult,
+} from "./validation";
