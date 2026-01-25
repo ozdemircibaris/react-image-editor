@@ -5,10 +5,10 @@
   "description": "Headless React image editor with blur, crop, shapes, drawing, and undo/redo. Use the hooks for custom UI or the styled components for quick integration.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/components/imageEditor/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/components/imageEditor/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js"
     },
@@ -42,7 +42,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "prepublishOnly": "npm run build",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "keywords": [
     "react",
