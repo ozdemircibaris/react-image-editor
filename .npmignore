@@ -4,6 +4,17 @@ src/
 *.tsx
 !dist/**/*.d.ts
 
+# Source maps (large, not needed in npm package)
+**/*.map
+
+# TypeScript build info
+**/*.tsbuildinfo
+
+# Duplicate type declarations (rollup typescript plugin issue)
+dist/core/core/
+dist/core/components/
+dist/core/constants/
+
 # Development files
 .next/
 node_modules/

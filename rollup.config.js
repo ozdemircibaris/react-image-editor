@@ -33,12 +33,12 @@ module.exports = [
       {
         file: "dist/index.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: false,
       },
       {
         file: "dist/index.esm.js",
         format: "esm",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
     plugins: [
@@ -61,12 +61,12 @@ module.exports = [
       {
         file: "dist/core/index.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: false,
       },
       {
         file: "dist/core/index.esm.js",
         format: "esm",
-        sourcemap: true,
+        sourcemap: false,
       },
     ],
     plugins: [
