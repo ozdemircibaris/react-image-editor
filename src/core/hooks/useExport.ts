@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { fabric } from "fabric";
 
 import { dataURLToBlob } from "../utils";
+import type { EditorFabricImage } from "../types";
 
 // ============================================================================
 // Types
@@ -19,7 +20,7 @@ export interface UseExportReturn {
 // ============================================================================
 
 /**
- * Hook for exporting canvas content
+ * Hook for exporting canvas content at original image resolution
  *
  * @example
  * ```tsx
@@ -39,7 +40,7 @@ export function useExport(
 ): UseExportReturn {
   const exportToBlob = useCallback(async (): Promise<Blob | null> => {
     const canvas = canvasRef.current;
-    const image = originalImageRef.current;
+    const image = originalImageRef.current as EditorFabricImage | null;
     if (!canvas || !image) return null;
 
     // Store viewport state for restoration
@@ -51,44 +52,27 @@ export function useExport(
       canvas.setZoom(1);
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
 
-      // Get image bounds
+      // Get image position and scaled dimensions
       const imgLeft = image.left || 0;
       const imgTop = image.top || 0;
-      const imgWidth = image.getScaledWidth();
-      const imgHeight = image.getScaledHeight();
+      const scaledWidth = image.getScaledWidth();
+      const scaledHeight = image.getScaledHeight();
 
-      let minX = imgLeft;
-      let minY = imgTop;
-      let maxX = imgLeft + imgWidth;
-      let maxY = imgTop + imgHeight;
+      // Get original dimensions (stored during image load)
+      const originalWidth = image.originalWidth || image.width || scaledWidth;
+      const originalHeight = image.originalHeight || image.height || scaledHeight;
 
-      // Include other objects in bounds calculation
-      canvas.getObjects().forEach((obj) => {
-        if (obj !== image) {
-          const bounds = obj.getBoundingRect();
-          minX = Math.min(minX, bounds.left);
-          minY = Math.min(minY, bounds.top);
-          maxX = Math.max(maxX, bounds.left + bounds.width);
-          maxY = Math.max(maxY, bounds.top + bounds.height);
-        }
-      });
-
-      // Clamp to canvas boundaries
-      const canvasWidth = canvas.getWidth();
-      const canvasHeight = canvas.getHeight();
-      minX = Math.max(0, minX);
-      minY = Math.max(0, minY);
-      maxX = Math.min(canvasWidth, maxX);
-      maxY = Math.min(canvasHeight, maxY);
+      // Calculate multiplier to export at original resolution
+      const multiplier = originalWidth / scaledWidth;
 
       const dataURL = canvas.toDataURL({
         format: "png",
         quality: 1,
-        left: Math.round(minX),
-        top: Math.round(minY),
-        width: Math.round(maxX - minX),
-        height: Math.round(maxY - minY),
-        multiplier: 1,
+        left: Math.round(imgLeft),
+        top: Math.round(imgTop),
+        width: Math.round(scaledWidth),
+        height: Math.round(scaledHeight),
+        multiplier: multiplier,
       });
 
       // Restore viewport state

@@ -244,6 +244,9 @@ export function useCrop(
         });
 
         (img as EditorFabricImage).id = "originalImage";
+        // Store cropped dimensions as new original for export
+        (img as EditorFabricImage).originalWidth = coords.width;
+        (img as EditorFabricImage).originalHeight = coords.height;
         lockImage(img);
 
         canvas.add(img);

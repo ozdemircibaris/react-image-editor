@@ -42,6 +42,10 @@ export interface EditorFabricObject extends fabric.Object {
  */
 export interface EditorFabricImage extends fabric.Image {
   id?: string;
+  /** Original image width before scaling to fit canvas */
+  originalWidth?: number;
+  /** Original image height before scaling to fit canvas */
+  originalHeight?: number;
 }
 
 /**

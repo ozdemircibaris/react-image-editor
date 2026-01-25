@@ -29,12 +29,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "build:lib": "rollup -c",
-    "prepublishOnly": "npm run build:lib"
+    "build": "rollup -c",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "react",
@@ -66,23 +63,19 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.27.1",
-    "@eslint/eslintrc": "^3",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.8",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@tailwindcss/postcss": "^4",
     "@types/fabric": "^5.3.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.4.6",
     "rollup": "^4.46.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-svg": "^2.0.0",
-    "tailwindcss": "^4",
     "typescript": "^5"
   },
   "repository": {
