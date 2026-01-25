@@ -10,7 +10,7 @@ import type {
   ImageEditorConfig,
   UseImageEditorReturn,
 } from "../types";
-import { CleanupManager } from "../utils";
+import { CleanupManager, calculateCanvasSize } from "../utils";
 
 import { useHistory } from "./useHistory";
 import { useBlur } from "./useBlur";
@@ -26,8 +26,10 @@ import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 // Constants
 // ============================================================================
 
-const DEFAULT_CONFIG: Required<ImageEditorConfig> = {
+const DEFAULT_CONFIG = {
   imageUrl: "",
+  width: undefined as number | undefined,
+  height: undefined as number | undefined,
   maxHistorySize: 50,
   defaultColor: "#ff7000",
   defaultStrokeWidth: 2,
@@ -66,13 +68,23 @@ export function useImageEditor(
 ): UseImageEditorReturn {
   const mergedConfig = { ...DEFAULT_CONFIG, ...config };
 
-  // Refs
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // ========== Refs ==========
   const canvasInstanceRef = useRef<fabric.Canvas | null>(null);
   const originalImageRef = useRef<fabric.Image | null>(null);
   const cleanupRef = useRef(new CleanupManager());
+  const isInitializedRef = useRef(false);
+  const loadingImageRef = useRef<string | null>(null);
 
-  // State
+  // Config ref - always has current config without causing re-renders
+  const configRef = useRef(mergedConfig);
+  useEffect(() => {
+    configRef.current = mergedConfig;
+  });
+
+  // ========== State ==========
+  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(
+    null
+  );
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [originalImage, setOriginalImage] = useState<fabric.Image | null>(null);
   const [hasImage, setHasImage] = useState(false);
@@ -81,7 +93,12 @@ export function useImageEditor(
     mergedConfig.defaultStrokeWidth
   );
 
-  // Keep refs in sync
+  // ========== Callback ref for canvas element ==========
+  const canvasRef = useCallback((node: HTMLCanvasElement | null) => {
+    setCanvasElement(node);
+  }, []);
+
+  // Keep refs in sync with state
   useEffect(() => {
     canvasInstanceRef.current = canvas;
   }, [canvas]);
@@ -90,43 +107,53 @@ export function useImageEditor(
     originalImageRef.current = originalImage;
   }, [originalImage]);
 
-  // Update original image reference after undo/redo
+  // ========== Update original image reference after undo/redo ==========
   const updateOriginalImageReference = useCallback(() => {
     const currentCanvas = canvasInstanceRef.current;
     if (!currentCanvas) return;
 
-    const objects = currentCanvas.getObjects();
-    const imageObj = objects.find(
-      (obj) => (obj as EditorFabricImage).id === "originalImage"
-    ) as fabric.Image;
+    try {
+      const objects = currentCanvas.getObjects();
+      const imageObj = objects.find(
+        (obj) => (obj as EditorFabricImage).id === "originalImage"
+      ) as fabric.Image;
 
-    if (imageObj) {
-      imageObj.set({
-        selectable: false,
-        evented: false,
-        hasControls: false,
-        hasBorders: false,
-        lockMovementX: true,
-        lockMovementY: true,
-        lockRotation: true,
-        lockScalingX: true,
-        lockScalingY: true,
-        lockUniScaling: true,
-      });
-      currentCanvas.renderAll();
-      setOriginalImage(imageObj);
-      originalImageRef.current = imageObj;
+      if (imageObj) {
+        imageObj.set({
+          selectable: false,
+          evented: false,
+          hasControls: false,
+          hasBorders: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          lockRotation: true,
+          lockScalingX: true,
+          lockScalingY: true,
+          lockUniScaling: true,
+        });
+        currentCanvas.renderAll();
+        setOriginalImage(imageObj);
+        originalImageRef.current = imageObj;
+      }
+    } catch {
+      // Canvas might be disposed
     }
   }, []);
 
-  // History hook
+  // ========== History hook ==========
   const history = useHistory(canvasInstanceRef, {
     maxHistorySize: mergedConfig.maxHistorySize,
     throttleMs: mergedConfig.historyThrottleMs,
     onAfterStateLoad: updateOriginalImageReference,
   });
 
-  // Set original image callback
+  // History ref for use in callbacks without dependency
+  const historyRef = useRef(history);
+  useEffect(() => {
+    historyRef.current = history;
+  });
+
+  // ========== Set original image callback ==========
   const setOriginalImageCallback = useCallback((img: fabric.Image | null) => {
     if (img) {
       (img as EditorFabricImage).id = "originalImage";
@@ -136,50 +163,49 @@ export function useImageEditor(
     setHasImage(img !== null);
   }, []);
 
-  // Blur hook
+  // ========== Feature hooks ==========
   const blur = useBlur(canvasInstanceRef, originalImageRef, {
     blurIntensity: mergedConfig.blurIntensity,
     throttleMs: mergedConfig.blurThrottleMs,
-    onBlurAdd: () => history.saveState(),
+    onBlurAdd: () => historyRef.current.saveState(),
   });
 
-  // Crop hook
   const crop = useCrop(
     canvasInstanceRef,
     originalImageRef,
     setOriginalImageCallback,
     {
       onCropApply: () => {
-        history.initializeHistory();
+        historyRef.current.initializeHistory();
       },
     }
   );
 
-  // Drawing hook
   const drawing = useDrawing(canvasInstanceRef, originalImageRef, {
     initialColor: mergedConfig.defaultColor,
     initialWidth: mergedConfig.defaultStrokeWidth,
   });
 
-  // Selection hook
   const selectionHook = useSelection(canvasInstanceRef, originalImageRef, {
-    onDelete: () => history.saveState(),
+    onDelete: () => historyRef.current.saveState(),
   });
 
-  // Shapes hook
   const shapes = useShapes(canvasInstanceRef, originalImageRef, {
     defaultColor: currentColor,
     defaultStrokeWidth: currentStrokeWidth,
-    onShapeAdd: () => history.saveState(),
+    onShapeAdd: () => historyRef.current.saveState(),
   });
 
-  // Zoom hook
   const zoomHook = useZoom(canvasInstanceRef);
-
-  // Export hook
   const exportHook = useExport(canvasInstanceRef, originalImageRef);
 
-  // Keyboard shortcuts
+  // Selection hook ref for event handlers
+  const selectionHookRef = useRef(selectionHook);
+  useEffect(() => {
+    selectionHookRef.current = selectionHook;
+  });
+
+  // ========== Keyboard shortcuts ==========
   useKeyboardShortcuts({
     onUndo: history.undo,
     onRedo: history.redo,
@@ -187,93 +213,144 @@ export function useImageEditor(
     canDelete: () => !!selectionHook.selectedObject,
   });
 
-  // Load image
+  // ========== Get canvas dimensions ==========
+  const getCanvasDimensions = useCallback(() => {
+    const cfg = configRef.current;
+    if (cfg.width && cfg.height) {
+      return { width: cfg.width, height: cfg.height };
+    }
+    return calculateCanvasSize(
+      typeof window !== "undefined" ? window.innerWidth : 800,
+      typeof window !== "undefined" ? window.innerHeight : 600
+    );
+  }, []);
+
+  // ========== Load image (stable function, uses refs) ==========
   const loadImage = useCallback(
-    async (url: string) => {
+    async (url: string): Promise<fabric.Image | undefined> => {
       const currentCanvas = canvasInstanceRef.current;
       if (!currentCanvas || !url) return;
+
+      // Prevent duplicate loads
+      if (loadingImageRef.current === url) return;
+      loadingImageRef.current = url;
 
       return new Promise<fabric.Image>((resolve, reject) => {
         fabric.Image.fromURL(
           url,
           (img) => {
+            // Clear loading state
+            loadingImageRef.current = null;
+
+            // Re-check canvas - might be disposed while loading
+            const canvas = canvasInstanceRef.current;
+            if (!canvas) {
+              reject(new Error("Canvas was disposed"));
+              return;
+            }
+
             if (!img || !img.width || !img.height) {
               reject(new Error("Failed to load image"));
               return;
             }
 
-            const canvasWidth = currentCanvas.getWidth();
-            const canvasHeight = currentCanvas.getHeight();
-            const padding = mergedConfig.canvasPadding;
+            try {
+              const canvasWidth = canvas.getWidth();
+              const canvasHeight = canvas.getHeight();
+              const padding = configRef.current.canvasPadding;
 
-            const maxWidth = canvasWidth - padding * 2;
-            const maxHeight = canvasHeight - padding * 2;
-            const scaleX = maxWidth / img.width;
-            const scaleY = maxHeight / img.height;
-            const scale = Math.min(scaleX, scaleY, 1);
+              const maxWidth = canvasWidth - padding * 2;
+              const maxHeight = canvasHeight - padding * 2;
+              const scaleX = maxWidth / img.width;
+              const scaleY = maxHeight / img.height;
+              const scale = Math.min(scaleX, scaleY, 1);
 
-            img.scale(scale);
+              img.scale(scale);
 
-            const scaledWidth = img.getScaledWidth();
-            const scaledHeight = img.getScaledHeight();
-            const left = (canvasWidth - scaledWidth) / 2;
-            const top = (canvasHeight - scaledHeight) / 2;
+              const scaledWidth = img.getScaledWidth();
+              const scaledHeight = img.getScaledHeight();
+              const left = (canvasWidth - scaledWidth) / 2;
+              const top = (canvasHeight - scaledHeight) / 2;
 
-            img.set({
-              left,
-              top,
-              originX: "left",
-              originY: "top",
-              selectable: false,
-              evented: false,
-              hasControls: false,
-              hasBorders: false,
-              lockMovementX: true,
-              lockMovementY: true,
-              lockRotation: true,
-              lockScalingX: true,
-              lockScalingY: true,
-              lockUniScaling: true,
-            });
+              img.set({
+                left,
+                top,
+                originX: "left",
+                originY: "top",
+                selectable: false,
+                evented: false,
+                hasControls: false,
+                hasBorders: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                lockRotation: true,
+                lockScalingX: true,
+                lockScalingY: true,
+                lockUniScaling: true,
+              });
 
-            (img as EditorFabricImage).id = "originalImage";
+              (img as EditorFabricImage).id = "originalImage";
 
-            currentCanvas.add(img);
-            currentCanvas.renderAll();
+              canvas.add(img);
+              canvas.renderAll();
 
-            setOriginalImage(img);
-            originalImageRef.current = img;
-            setHasImage(true);
+              setOriginalImage(img);
+              originalImageRef.current = img;
+              setHasImage(true);
 
-            history.initializeHistory();
+              // Initialize history after image is loaded
+              historyRef.current.initializeHistory();
 
-            resolve(img);
+              resolve(img);
+            } catch {
+              reject(new Error("Canvas was disposed during render"));
+            }
           },
           { crossOrigin: "anonymous" }
         );
+      }).catch((err) => {
+        // Silently handle disposed canvas errors
+        if (err?.message?.includes("disposed")) {
+          return undefined;
+        }
+        return undefined;
       });
     },
-    [mergedConfig.canvasPadding, history]
+    []
   );
 
-  // Initialize canvas
+  // ========== Initialize canvas ==========
   useEffect(() => {
-    if (!canvasRef.current || canvasInstanceRef.current) return;
+    // Skip if no canvas element
+    if (!canvasElement) return;
 
-    const fabricCanvas = new fabric.Canvas(canvasRef.current);
+    // Skip if already initialized (React 18 Strict Mode protection)
+    if (isInitializedRef.current && canvasInstanceRef.current) return;
+
+    const { width, height } = getCanvasDimensions();
+    const fabricCanvas = new fabric.Canvas(canvasElement);
+
+    fabricCanvas.setWidth(width);
+    fabricCanvas.setHeight(height);
     fabricCanvas.setBackgroundColor("transparent", () => {
       fabricCanvas.renderAll();
     });
 
     canvasInstanceRef.current = fabricCanvas;
+    isInitializedRef.current = true;
     setCanvas(fabricCanvas);
 
-    if (mergedConfig.imageUrl) {
-      loadImage(mergedConfig.imageUrl);
+    // Load initial image if URL is provided
+    const initialUrl = configRef.current.imageUrl;
+    if (initialUrl) {
+      loadImage(initialUrl);
     }
 
     return () => {
       cleanupRef.current.cleanup();
+      isInitializedRef.current = false;
+      loadingImageRef.current = null;
+
       if (canvasInstanceRef.current) {
         try {
           canvasInstanceRef.current.dispose();
@@ -281,59 +358,100 @@ export function useImageEditor(
           // Canvas might already be disposed
         }
         canvasInstanceRef.current = null;
+        setCanvas(null);
       }
     };
-  }, []); // Only run once on mount
+  }, [canvasElement, getCanvasDimensions, loadImage]);
 
-  // Load image when imageUrl changes
+  // ========== Handle window resize ==========
   useEffect(() => {
-    if (!canvasInstanceRef.current || !mergedConfig.imageUrl) return;
+    const cfg = configRef.current;
+    if (cfg.width && cfg.height) return;
 
+    const handleResize = () => {
+      const currentCanvas = canvasInstanceRef.current;
+      if (!currentCanvas) return;
+
+      try {
+        const { width, height } = getCanvasDimensions();
+        currentCanvas.setWidth(width);
+        currentCanvas.setHeight(height);
+        currentCanvas.renderAll();
+      } catch {
+        // Canvas might be disposed
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [getCanvasDimensions]);
+
+  // ========== Load image when imageUrl changes ==========
+  useEffect(() => {
     const currentCanvas = canvasInstanceRef.current;
-    const objects = currentCanvas.getObjects();
-    objects.forEach((obj) => {
-      currentCanvas.remove(obj);
-    });
-    currentCanvas.renderAll();
+    const imageUrl = mergedConfig.imageUrl;
+
+    // Skip if no canvas or no URL
+    if (!currentCanvas || !imageUrl) return;
+
+    // Skip if this is the initial load (handled in initialization)
+    if (!isInitializedRef.current) return;
+
+    // Clear existing objects
+    try {
+      const objects = currentCanvas.getObjects();
+      objects.forEach((obj) => {
+        currentCanvas.remove(obj);
+      });
+      currentCanvas.renderAll();
+    } catch {
+      return;
+    }
 
     setOriginalImage(null);
     originalImageRef.current = null;
     setHasImage(false);
 
-    loadImage(mergedConfig.imageUrl);
+    loadImage(imageUrl);
   }, [mergedConfig.imageUrl, loadImage]);
 
-  // Canvas event listeners
+  // ========== Canvas event listeners ==========
   useEffect(() => {
     const currentCanvas = canvasInstanceRef.current;
     if (!currentCanvas) return;
 
     const onSelectionCreated = (e: FabricSelectionEvent) => {
       if (e.selected?.[0]) {
-        (selectionHook as unknown as { _handleSelect: (obj: fabric.Object) => void })._handleSelect(e.selected[0]);
+        const hook = selectionHookRef.current as unknown as {
+          _handleSelect: (obj: fabric.Object) => void;
+        };
+        hook._handleSelect(e.selected[0]);
       }
     };
 
     const onSelectionUpdated = (e: FabricSelectionEvent) => {
       if (e.selected?.[0]) {
-        (selectionHook as unknown as { _handleSelect: (obj: fabric.Object) => void })._handleSelect(e.selected[0]);
+        const hook = selectionHookRef.current as unknown as {
+          _handleSelect: (obj: fabric.Object) => void;
+        };
+        hook._handleSelect(e.selected[0]);
       }
     };
 
     const onSelectionCleared = () => {
-      selectionHook.clearSelection();
+      selectionHookRef.current.clearSelection();
     };
 
     const onPathCreated = (e: FabricPathCreatedEvent) => {
       if (e.path) {
         const path = e.path as EditorFabricPath;
         path.isDrawing = true;
-        history.saveState();
+        historyRef.current.saveState();
       }
     };
 
     const onObjectModified = () => {
-      history.saveState();
+      historyRef.current.saveState();
     };
 
     currentCanvas.on("selection:created", onSelectionCreated);
@@ -344,16 +462,20 @@ export function useImageEditor(
     currentCanvas.on("object:modified", onObjectModified);
 
     return () => {
-      currentCanvas.off("selection:created", onSelectionCreated);
-      currentCanvas.off("selection:updated", onSelectionUpdated);
-      currentCanvas.off("selection:cleared", onSelectionCleared);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      currentCanvas.off("path:created", onPathCreated as any);
-      currentCanvas.off("object:modified", onObjectModified);
+      try {
+        currentCanvas.off("selection:created", onSelectionCreated);
+        currentCanvas.off("selection:updated", onSelectionUpdated);
+        currentCanvas.off("selection:cleared", onSelectionCleared);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentCanvas.off("path:created", onPathCreated as any);
+        currentCanvas.off("object:modified", onObjectModified);
+      } catch {
+        // Canvas might be disposed
+      }
     };
-  }, [history, selectionHook]);
+  }, [canvas]); // Only re-run when canvas changes
 
-  // Update drawing brush when color/width changes
+  // ========== Update drawing brush ==========
   useEffect(() => {
     const currentCanvas = canvasInstanceRef.current;
     if (!currentCanvas) return;
@@ -364,19 +486,19 @@ export function useImageEditor(
     }
   }, [currentColor, currentStrokeWidth]);
 
-  // Style handlers
+  // ========== Style handlers ==========
   const setColor = useCallback(
     (color: string) => {
       setCurrentColor(color);
 
       if (selectionHook.selectedObject) {
         selectionHook.setSelectedColor(color);
-        history.saveState();
+        historyRef.current.saveState();
       }
 
       drawing.setBrushColor(color);
     },
-    [selectionHook, drawing, history]
+    [selectionHook, drawing]
   );
 
   const setStrokeWidth = useCallback(
@@ -385,18 +507,20 @@ export function useImageEditor(
 
       if (selectionHook.selectedObject) {
         selectionHook.setSelectedStrokeWidth(width);
-        history.saveState();
+        historyRef.current.saveState();
       }
 
       drawing.setBrushWidth(width);
     },
-    [selectionHook, drawing, history]
+    [selectionHook, drawing]
   );
 
-  // Dispose
+  // ========== Dispose ==========
   const dispose = useCallback(() => {
     cleanupRef.current.cleanup();
     blur.clearAllBlur();
+    isInitializedRef.current = false;
+    loadingImageRef.current = null;
 
     if (canvasInstanceRef.current) {
       try {
@@ -412,7 +536,7 @@ export function useImageEditor(
     setHasImage(false);
   }, [blur]);
 
-  // State object
+  // ========== State object ==========
   const state: EditorState = useMemo(
     () => ({
       hasImage,
@@ -440,6 +564,7 @@ export function useImageEditor(
     ]
   );
 
+  // ========== Return ==========
   return {
     canvas,
     canvasRef,

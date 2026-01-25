@@ -180,8 +180,8 @@ export interface UseImageEditorReturn {
   // Canvas
   /** The Fabric.js canvas instance */
   canvas: fabric.Canvas | null;
-  /** Ref to attach to canvas element */
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  /** Callback ref to attach to canvas element - use as ref={canvasRef} */
+  canvasRef: (node: HTMLCanvasElement | null) => void;
   /** The original image object */
   originalImage: fabric.Image | null;
   /** Whether an image is loaded */

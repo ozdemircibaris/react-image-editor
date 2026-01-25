@@ -352,19 +352,24 @@ export function useBlur(
     throttledUpdatesRef.current.forEach(({ cancel }) => cancel());
     throttledUpdatesRef.current.clear();
 
-    // Remove all blur rects and patches
-    const objects = canvas.getObjects();
-    objects.forEach((obj) => {
-      const customObj = obj as EditorFabricObject;
-      const customRect = obj as EditorFabricRect;
+    try {
+      // Remove all blur rects and patches
+      const objects = canvas.getObjects();
+      objects.forEach((obj) => {
+        const customObj = obj as EditorFabricObject;
+        const customRect = obj as EditorFabricRect;
 
-      if (customRect.id?.startsWith("blur-") || customObj.isBlurPatch) {
-        canvas.remove(obj);
-      }
-    });
+        if (customRect.id?.startsWith("blur-") || customObj.isBlurPatch) {
+          canvas.remove(obj);
+        }
+      });
+
+      canvas.renderAll();
+    } catch {
+      // Canvas might be disposed
+    }
 
     setActiveBlurRects([]);
-    canvas.renderAll();
   }, [canvasRef]);
 
   return {

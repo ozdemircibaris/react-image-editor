@@ -8,6 +8,10 @@
 export interface ImageEditorConfig {
   /** URL of the image to edit */
   imageUrl: string;
+  /** Canvas width in pixels (auto-calculated from viewport if not provided) */
+  width?: number;
+  /** Canvas height in pixels (auto-calculated from viewport if not provided) */
+  height?: number;
   /** Maximum history size for undo/redo (default: 50) */
   maxHistorySize?: number;
   /** Default stroke color (default: "#ff7000") */
