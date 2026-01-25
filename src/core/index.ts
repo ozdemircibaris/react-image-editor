@@ -39,6 +39,9 @@ export {
   useDrawing,
   useShapes,
   useSelection,
+  useZoom,
+  useExport,
+  useKeyboardShortcuts,
 } from "./hooks";
 
 // ============================================================================

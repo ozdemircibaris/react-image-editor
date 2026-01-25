@@ -93,8 +93,7 @@ export function useCanvas(options: UseCanvasOptions = {}): UseCanvasReturn {
         setOriginalImage(img);
         setHasImage(true);
         onImageLoad?.(img);
-      } catch (error) {
-        console.error("Failed to load image:", error);
+      } catch {
         setHasImage(false);
       }
     },
@@ -174,9 +173,7 @@ export function useCanvas(options: UseCanvasOptions = {}): UseCanvasReturn {
       currentCanvas.renderAll();
 
       return await dataURLToBlob(dataURL);
-    } catch (error) {
-      console.error("Error exporting canvas:", error);
-
+    } catch {
       // Fallback: export entire canvas
       try {
         const fallbackDataURL = currentCanvas.toDataURL({
