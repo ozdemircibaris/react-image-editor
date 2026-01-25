@@ -259,6 +259,10 @@ export function useImageEditor(
               const canvasHeight = canvas.getHeight();
               const padding = configRef.current.canvasPadding;
 
+              // Store original dimensions BEFORE scaling
+              const originalWidth = img.width || 0;
+              const originalHeight = img.height || 0;
+
               const maxWidth = canvasWidth - padding * 2;
               const maxHeight = canvasHeight - padding * 2;
               const scaleX = maxWidth / img.width;
@@ -266,6 +270,10 @@ export function useImageEditor(
               const scale = Math.min(scaleX, scaleY, 1);
 
               img.scale(scale);
+
+              // Store original dimensions on the image object for export
+              (img as EditorFabricImage).originalWidth = originalWidth;
+              (img as EditorFabricImage).originalHeight = originalHeight;
 
               const scaledWidth = img.getScaledWidth();
               const scaledHeight = img.getScaledHeight();
