@@ -118,7 +118,6 @@ export function useText(
       if (!canvas) return;
 
       const textObj = new fabric.IText(initialText, {
-        fill: defaultColor,
         fontSize: defaultFontSize,
         fontFamily: defaultFontFamily,
         originX: "center",
@@ -128,7 +127,6 @@ export function useText(
         evented: true,
         hasControls: true,
         hasBorders: true,
-        cornerColor: defaultColor,
         cornerSize: 10,
         transparentCorners: false,
         objectCaching: false,
@@ -143,7 +141,13 @@ export function useText(
         estimatedWidth,
         estimatedHeight
       );
+
+      // Set fill and position explicitly after construction
+      // This ensures the color is applied correctly (Fabric.js IText quirk)
       textObj.set({
+        fill: defaultColor,
+        cornerColor: defaultColor,
+        borderColor: defaultColor,
         left: position.x,
         top: position.y,
       });
