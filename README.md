@@ -10,6 +10,7 @@ A professional image editing library for React applications with both headless a
 
 - **Headless Mode** - Full control over UI with React hooks
 - **Styled Components** - Ready-to-use components for quick setup
+- **Text Tool** - Add and style text with font controls
 - **Blur Tool** - Add selective blur effects to specific areas
 - **Crop Tool** - Pixel-perfect image cropping
 - **Shape Tools** - Rectangles and circles with custom styling
@@ -66,6 +67,7 @@ function CustomEditor({ imageUrl }: { imageUrl: string }) {
       <canvas ref={editor.canvasRef} />
 
       <div>
+        <button onClick={() => editor.text.addText()}>Add Text</button>
         <button onClick={() => editor.blur.add()}>Add Blur</button>
         <button onClick={() => editor.crop.start()}>Crop</button>
         <button onClick={() => editor.shapes.add("rectangle")}>Rectangle</button>
@@ -189,6 +191,13 @@ Exports preserve the original image dimensions. If you load a 1920x1080 image, t
 | `drawing.toggle()` | Toggle drawing mode |
 | `drawing.isActive` | Whether drawing is active |
 | `shapes.add(type)` | Add a shape ("rectangle" or "circle") |
+| `text.addText(text?)` | Add text to canvas |
+| `text.setFontSize(size)` | Set font size of selected text |
+| `text.setFontFamily(family)` | Set font family of selected text |
+| `text.setTextColor(color)` | Set color of selected text |
+| `text.setFontWeight(weight)` | Set bold ("normal" or "bold") |
+| `text.setFontStyle(style)` | Set italic ("normal" or "italic") |
+| `text.fontFamilies` | Available font families |
 | `selection.enable()` | Enable selection mode |
 | `selection.deleteSelected()` | Delete selected object |
 | `style.color` | Current color |
@@ -218,7 +227,27 @@ Exports preserve the original image dimensions. If you load a 1920x1080 image, t
 - `Ctrl/Cmd + Z` - Undo
 - `Ctrl/Cmd + Y` - Redo
 - `Delete/Backspace` - Delete selected object
+- `Escape` - Exit text editing mode
 - `Space + Drag` - Pan canvas
+
+## Development
+
+```bash
+# Run tests
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
+
+# Lint
+npm run lint
+
+# Build
+npm run build
+```
 
 ## License
 

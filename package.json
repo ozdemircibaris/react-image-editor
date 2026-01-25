@@ -20,7 +20,9 @@
   },
   "typesVersions": {
     "*": {
-      "core": ["./dist/core/index.d.ts"]
+      "core": [
+        "./dist/core/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -36,7 +38,11 @@
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint src --ext .ts,.tsx",
-    "prepublishOnly": "npm run build"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
   },
   "keywords": [
     "react",
@@ -72,16 +78,25 @@
     "@rollup/plugin-commonjs": "^25.0.8",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@testing-library/react": "^16.3.2",
     "@types/fabric": "^5.3.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9",
+    "happy-dom": "^20.3.7",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "rollup": "^4.46.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-svg": "^2.0.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.53.1",
+    "vitest": "^4.0.18"
   },
   "repository": {
     "type": "git",
@@ -90,5 +105,10 @@
   "bugs": {
     "url": "https://github.com/ozdemircibaris/react-image-editor/issues"
   },
-  "homepage": "https://image-editor.ozdemircibaris.dev"
+  "homepage": "https://image-editor.ozdemircibaris.dev",
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix"
+    ]
+  }
 }
