@@ -148,9 +148,8 @@ export function disposeFabricCanvas(canvas: fabric.Canvas | null): void {
 
     // Dispose the canvas
     canvas.dispose();
-  } catch (error) {
+  } catch {
     // Canvas might already be disposed or in an invalid state
-    console.warn("Error disposing Fabric canvas:", error);
   }
 }
 

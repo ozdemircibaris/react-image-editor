@@ -9,3 +9,6 @@ export { useCrop } from "./useCrop";
 export { useDrawing } from "./useDrawing";
 export { useShapes } from "./useShapes";
 export { useSelection } from "./useSelection";
+export { useZoom } from "./useZoom";
+export { useExport } from "./useExport";
+export { useKeyboardShortcuts } from "./useKeyboardShortcuts";

@@ -27,3 +27,14 @@ export {
   safeRequestAnimationFrame,
   addTrackedEventListener,
 } from "./memory";
+
+// Crop utilities
+export {
+  createCropOverlays,
+  createCropRect,
+  createCropLabel,
+  updateCropLabel,
+  constrainCropRectInside,
+  limitCropRectScale,
+  calculateCropCoordinates,
+} from "./crop";

@@ -9,6 +9,13 @@ import {
   calculateCenterPosition,
   createTempCanvas,
   CleanupManager,
+  createCropOverlays,
+  createCropRect,
+  createCropLabel,
+  updateCropLabel,
+  constrainCropRectInside,
+  limitCropRectScale,
+  calculateCropCoordinates,
 } from "../utils";
 
 // ============================================================================
@@ -77,122 +84,6 @@ export function useCrop(
   const cleanupRef = useRef(new CleanupManager());
 
   /**
-   * Create overlay rectangles for crop mode
-   */
-  const createOverlays = useCallback(
-    (canvas: fabric.Canvas, imgBounds: Bounds): fabric.Rect[] => {
-      const canvasWidth = canvas.getWidth();
-      const canvasHeight = canvas.getHeight();
-
-      const overlayOptions = {
-        fill: "rgba(0, 0, 0, 0.5)",
-        selectable: false,
-        evented: false,
-        excludeFromExport: true,
-      };
-
-      const topOverlay = new fabric.Rect({
-        left: 0,
-        top: 0,
-        width: canvasWidth,
-        height: imgBounds.top,
-        ...overlayOptions,
-      } as fabric.IRectOptions);
-
-      const bottomOverlay = new fabric.Rect({
-        left: 0,
-        top: imgBounds.top + imgBounds.height,
-        width: canvasWidth,
-        height: canvasHeight - (imgBounds.top + imgBounds.height),
-        ...overlayOptions,
-      } as fabric.IRectOptions);
-
-      const leftOverlay = new fabric.Rect({
-        left: 0,
-        top: imgBounds.top,
-        width: imgBounds.left,
-        height: imgBounds.height,
-        ...overlayOptions,
-      } as fabric.IRectOptions);
-
-      const rightOverlay = new fabric.Rect({
-        left: imgBounds.left + imgBounds.width,
-        top: imgBounds.top,
-        width: canvasWidth - (imgBounds.left + imgBounds.width),
-        height: imgBounds.height,
-        ...overlayOptions,
-      } as fabric.IRectOptions);
-
-      return [topOverlay, bottomOverlay, leftOverlay, rightOverlay];
-    },
-    []
-  );
-
-  /**
-   * Create crop rectangle with visual styling
-   */
-  const createCropRect = useCallback(
-    (imgBounds: Bounds): fabric.Rect => {
-      const cropWidth = Math.min(200, imgBounds.width * 0.8);
-      const cropHeight = Math.min(150, imgBounds.height * 0.8);
-
-      return new fabric.Rect({
-        left: imgBounds.left + (imgBounds.width - cropWidth) / 2,
-        top: imgBounds.top + (imgBounds.height - cropHeight) / 2,
-        width: cropWidth,
-        height: cropHeight,
-        originX: "left",
-        originY: "top",
-        fill: "rgba(255,255,255,0.02)",
-        stroke: "#60a5fa",
-        strokeWidth: 2,
-        strokeUniform: true,
-        strokeDashArray: [6, 4],
-        selectable: true,
-        hasControls: true,
-        hasBorders: true,
-        lockRotation: true,
-        minScaleLimit: 0.1,
-        cornerStyle: "rect",
-        cornerColor: "#ffffff",
-        borderColor: "#60a5fa",
-        transparentCorners: false,
-        cornerSize: 12,
-        padding: 2,
-        objectCaching: false,
-      } as fabric.IRectOptions);
-    },
-    []
-  );
-
-  /**
-   * Create dimension label for crop rect
-   */
-  const createLabel = useCallback(
-    (rect: fabric.Rect): fabric.Textbox => {
-      const w = Math.round(rect.getScaledWidth());
-      const h = Math.round(rect.getScaledHeight());
-
-      const label = new fabric.Textbox(`${w} × ${h}`, {
-        left: rect.left || 0,
-        top: (rect.top || 0) - 28,
-        fontSize: 12,
-        fill: "#e5e7eb",
-        backgroundColor: "rgba(17,24,39,0.6)",
-        padding: 6,
-        textAlign: "center",
-        selectable: false,
-        evented: false,
-      });
-
-      (label as unknown as { excludeFromExport: boolean }).excludeFromExport = true;
-
-      return label;
-    },
-    []
-  );
-
-  /**
    * Start crop mode
    */
   const startCrop = useCallback(() => {
@@ -208,7 +99,11 @@ export function useCrop(
     onCropStart?.();
 
     // Create overlays
-    const overlays = createOverlays(canvas, imgBounds);
+    const overlays = createCropOverlays(
+      canvas.getWidth(),
+      canvas.getHeight(),
+      imgBounds
+    );
     overlays.forEach((overlay) => canvas.add(overlay));
 
     // Create crop rectangle
@@ -216,7 +111,7 @@ export function useCrop(
     canvas.add(cropRect);
 
     // Create label
-    const label = createLabel(cropRect);
+    const label = createCropLabel(cropRect);
     canvas.add(label);
 
     // Set active object
@@ -233,74 +128,30 @@ export function useCrop(
       height: cropRect.getScaledHeight(),
     });
 
-    // Attach event listeners for constraining and label updates
-    const updateLabelAndBounds = (): void => {
-      const w = Math.round(cropRect.getScaledWidth());
-      const h = Math.round(cropRect.getScaledHeight());
-      label.set({
-        text: `${w} × ${h}`,
-        left: cropRect.left || 0,
-        top: (cropRect.top || 0) - 28,
-      });
-
+    // Event handlers
+    const onMoving = (): void => {
+      constrainCropRectInside(cropRect, imgBounds);
+      const { width, height } = updateCropLabel(label, cropRect);
       setCropBounds({
         left: cropRect.left || 0,
         top: cropRect.top || 0,
-        width: w,
-        height: h,
+        width,
+        height,
       });
-    };
-
-    const constrainInside = (): void => {
-      const scaledW = cropRect.getScaledWidth();
-      const scaledH = cropRect.getScaledHeight();
-      let left = cropRect.left || 0;
-      let top = cropRect.top || 0;
-
-      left = Math.max(
-        imgBounds.left,
-        Math.min(left, imgBounds.left + imgBounds.width - scaledW)
-      );
-      top = Math.max(
-        imgBounds.top,
-        Math.min(top, imgBounds.top + imgBounds.height - scaledH)
-      );
-
-      cropRect.set({ left, top });
-    };
-
-    const onMoving = (): void => {
-      constrainInside();
-      updateLabelAndBounds();
       canvas.requestRenderAll();
     };
 
     const onScaling = (): void => {
-      constrainInside();
-      updateLabelAndBounds();
-
-      // Limit scale to available space
-      const availableW = imgBounds.left + imgBounds.width - (cropRect.left || 0);
-      const availableH = imgBounds.top + imgBounds.height - (cropRect.top || 0);
-      const baseW = Math.max(1, cropRect.width || 1);
-      const baseH = Math.max(1, cropRect.height || 1);
-
-      const maxScaleX = Math.max(0.1, availableW / baseW);
-      const maxScaleY = Math.max(0.1, availableH / baseH);
-      const minScaleX = 24 / baseW;
-      const minScaleY = 24 / baseH;
-
-      const curScaleX = cropRect.scaleX || 1;
-      const curScaleY = cropRect.scaleY || 1;
-
-      const nextScaleX = Math.min(Math.max(curScaleX, minScaleX), maxScaleX);
-      const nextScaleY = Math.min(Math.max(curScaleY, minScaleY), maxScaleY);
-
-      if (nextScaleX !== curScaleX || nextScaleY !== curScaleY) {
-        cropRect.set({ scaleX: nextScaleX, scaleY: nextScaleY });
-      }
-
-      constrainInside();
+      constrainCropRectInside(cropRect, imgBounds);
+      const { width, height } = updateCropLabel(label, cropRect);
+      setCropBounds({
+        left: cropRect.left || 0,
+        top: cropRect.top || 0,
+        width,
+        height,
+      });
+      limitCropRectScale(cropRect, imgBounds);
+      constrainCropRectInside(cropRect, imgBounds);
       canvas.requestRenderAll();
     };
 
@@ -308,14 +159,7 @@ export function useCrop(
     cropRect.on("scaling", onScaling);
 
     canvas.renderAll();
-  }, [
-    canvasRef,
-    imageRef,
-    createOverlays,
-    createCropRect,
-    createLabel,
-    onCropStart,
-  ]);
+  }, [canvasRef, imageRef, onCropStart]);
 
   /**
    * Apply the current crop
@@ -323,50 +167,25 @@ export function useCrop(
   const applyCrop = useCallback(async (): Promise<void> => {
     const canvas = canvasRef.current;
     const originalImage = imageRef.current;
-    const { cropRect, overlays, label } = cropStateRef.current;
+    const { cropRect } = cropStateRef.current;
 
     if (!canvas || !originalImage || !cropRect) return;
 
     const cleanup = cleanupRef.current;
-
-    // Get crop bounds in canvas space
     const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
-    const inverted = fabric.util.invertTransform(vpt as number[]);
 
-    const bounds = cropRect.getBoundingRect();
-    const tlScreen = new fabric.Point(bounds.left, bounds.top);
-    const brScreen = new fabric.Point(
-      bounds.left + bounds.width,
-      bounds.top + bounds.height
+    // Calculate crop coordinates
+    const coords = calculateCropCoordinates(
+      cropRect,
+      originalImage,
+      vpt as number[]
     );
-    const tlCanvas = fabric.util.transformPoint(tlScreen, inverted);
-    const brCanvas = fabric.util.transformPoint(brScreen, inverted);
-
-    // Image position and scale
-    const imgLeft = originalImage.left || 0;
-    const imgTop = originalImage.top || 0;
-    const scaleX = originalImage.scaleX || 1;
-    const scaleY = originalImage.scaleY || 1;
-    const imgW = originalImage.width || 0;
-    const imgH = originalImage.height || 0;
-
-    // Compute crop in image pixel space
-    let cropX = (tlCanvas.x - imgLeft) / scaleX;
-    let cropY = (tlCanvas.y - imgTop) / scaleY;
-    let cropWidth = (brCanvas.x - tlCanvas.x) / scaleX;
-    let cropHeight = (brCanvas.y - tlCanvas.y) / scaleY;
-
-    // Clamp to image bounds
-    cropX = Math.max(0, Math.min(cropX, imgW));
-    cropY = Math.max(0, Math.min(cropY, imgH));
-    cropWidth = Math.max(1, Math.min(cropWidth, imgW - cropX));
-    cropHeight = Math.max(1, Math.min(cropHeight, imgH - cropY));
 
     // Create cropped image
     const imgElement = originalImage.getElement() as HTMLImageElement;
     const { canvas: croppedCanvas, ctx } = createTempCanvas(
-      Math.round(cropWidth),
-      Math.round(cropHeight),
+      coords.width,
+      coords.height,
       cleanup
     );
 
@@ -377,14 +196,14 @@ export function useCrop(
 
     ctx.drawImage(
       imgElement,
-      Math.round(cropX),
-      Math.round(cropY),
-      Math.round(cropWidth),
-      Math.round(cropHeight),
+      coords.x,
+      coords.y,
+      coords.width,
+      coords.height,
       0,
       0,
-      Math.round(cropWidth),
-      Math.round(cropHeight)
+      coords.width,
+      coords.height
     );
 
     const croppedDataUrl = croppedCanvas.toDataURL();

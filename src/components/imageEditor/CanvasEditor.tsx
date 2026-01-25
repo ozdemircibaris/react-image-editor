@@ -64,7 +64,6 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
           (canvas as any).dispose?.();
         } catch {
           // Canvas might not have dispose method in some versions
-          console.warn("Canvas dispose method not available");
         }
       }
     };

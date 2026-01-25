@@ -51,7 +51,6 @@ export const Icon = ({ name, width = 20, height = 20, className, title }: IconPr
   const svgDataUrl = iconMap[name];
 
   if (!svgDataUrl) {
-    console.warn(`Icon "${name}" not found in iconMap`);
     return null;
   }
 

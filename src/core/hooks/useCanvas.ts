@@ -93,8 +93,7 @@ export function useCanvas(options: UseCanvasOptions = {}): UseCanvasReturn {
         setOriginalImage(img);
         setHasImage(true);
         onImageLoad?.(img);
-      } catch (error) {
-        console.error("Failed to load image:", error);
+      } catch {
         setHasImage(false);
       }
     },
@@ -115,12 +114,12 @@ export function useCanvas(options: UseCanvasOptions = {}): UseCanvasReturn {
     const currentCanvas = canvasInstanceRef.current;
     if (!currentCanvas || !originalImage) return null;
 
-    try {
-      // Store current viewport state
-      const currentViewportTransform =
-        currentCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
-      const currentZoom = currentCanvas.getZoom();
+    // Store current viewport state for restoration
+    const currentViewportTransform =
+      currentCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    const currentZoom = currentCanvas.getZoom();
 
+    try {
       // Reset viewport for accurate export
       currentCanvas.setZoom(1);
       currentCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
@@ -174,8 +173,11 @@ export function useCanvas(options: UseCanvasOptions = {}): UseCanvasReturn {
       currentCanvas.renderAll();
 
       return await dataURLToBlob(dataURL);
-    } catch (error) {
-      console.error("Error exporting canvas:", error);
+    } catch {
+      // Restore viewport state on error to prevent corrupted canvas state
+      currentCanvas.setZoom(currentZoom);
+      currentCanvas.setViewportTransform(currentViewportTransform);
+      currentCanvas.renderAll();
 
       // Fallback: export entire canvas
       try {
