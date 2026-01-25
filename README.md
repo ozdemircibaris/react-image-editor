@@ -3,11 +3,12 @@
 Professional image editing made simple with a powerful React component built on modern web technologies.
 
 [![Demo](https://img.shields.io/badge/Demo-Live%20Preview-blue?style=for-the-badge)](https://image-editor.ozdemircibaris.dev)
-[![Version](https://img.shields.io/badge/version-1.0.9-green.svg)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
+[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://www.npmjs.com/package/@ozdemircibaris/react-image-editor)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
 
+- 🧩 **Headless Mode** - Use hooks for complete UI control, or use styled components for quick setup
 - 🎨 **Professional Image Editing** - Load and edit images with intuitive tools
 - 🔍 **Smart Blur Tool** - Add selective blur effects to specific areas
 - ✂️ **Precise Crop Tool** - Crop images with pixel-perfect accuracy
@@ -84,6 +85,83 @@ function App() {
 
 export default App;
 ```
+
+## 🎯 Headless Mode (v1.2.0+)
+
+For complete control over your UI, use the headless hooks from `/core`:
+
+```tsx
+import { useImageEditor } from "@ozdemircibaris/react-image-editor/core";
+
+function CustomEditor({ imageUrl }: { imageUrl: string }) {
+  const editor = useImageEditor({
+    imageUrl,
+    defaultColor: "#ff0000",
+    defaultStrokeWidth: 3,
+  });
+
+  return (
+    <div>
+      {/* Your custom canvas container */}
+      <canvas ref={editor.bindCanvas} />
+
+      {/* Your custom toolbar */}
+      <button onClick={() => editor.blur.add()}>Add Blur</button>
+      <button onClick={() => editor.crop.start()}>Crop</button>
+      <button onClick={() => editor.shapes.add("rectangle")}>Rectangle</button>
+      <button onClick={() => editor.shapes.add("circle")}>Circle</button>
+      <button onClick={() => editor.drawing.toggle()}>
+        {editor.drawing.isActive ? "Stop Drawing" : "Draw"}
+      </button>
+      <button onClick={editor.history.undo} disabled={!editor.history.canUndo}>
+        Undo
+      </button>
+      <button onClick={editor.history.redo} disabled={!editor.history.canRedo}>
+        Redo
+      </button>
+
+      {/* Crop controls */}
+      {editor.crop.isActive && (
+        <div>
+          <button onClick={() => editor.crop.apply()}>Apply Crop</button>
+          <button onClick={() => editor.crop.cancel()}>Cancel Crop</button>
+        </div>
+      )}
+
+      {/* Save */}
+      <button
+        onClick={async () => {
+          const blob = await editor.exportToBlob();
+          if (blob) {
+            // Handle the blob
+          }
+        }}
+      >
+        Save
+      </button>
+    </div>
+  );
+}
+```
+
+### useImageEditor Return Value
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `canvas` | `fabric.Canvas \| null` | The Fabric.js canvas instance |
+| `bindCanvas` | `(el: HTMLCanvasElement) => void` | Ref callback to bind canvas element |
+| `hasImage` | `boolean` | Whether an image is loaded |
+| `state` | `EditorState` | Current editor state |
+| `history` | `UseHistoryReturn` | Undo/redo controls |
+| `blur` | `UseBlurReturn` | Blur tool controls |
+| `crop` | `UseCropReturn` | Crop tool controls |
+| `drawing` | `UseDrawingReturn` | Drawing mode controls |
+| `shapes` | `UseShapesReturn` | Shape tools |
+| `selection` | `UseSelectionReturn` | Selection controls |
+| `style` | `UseStyleReturn` | Color and stroke controls |
+| `zoom` | `UseZoomReturn` | Zoom controls |
+| `exportToBlob` | `() => Promise<Blob \| null>` | Export canvas to blob |
+| `dispose` | `() => void` | Cleanup resources |
 
 ## 🔧 API Reference
 
