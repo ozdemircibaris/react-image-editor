@@ -119,6 +119,26 @@ export interface UseShapesReturn {
 }
 
 /**
+ * Return type for useText hook
+ */
+export interface UseTextReturn {
+  /** Add a text object to canvas */
+  addText: (initialText?: string) => void;
+  /** Set font size of selected text */
+  setFontSize: (size: number) => void;
+  /** Set font family of selected text */
+  setFontFamily: (family: string) => void;
+  /** Set text color of selected text */
+  setTextColor: (color: string) => void;
+  /** Set font weight (bold) */
+  setFontWeight: (weight: "normal" | "bold") => void;
+  /** Set font style (italic) */
+  setFontStyle: (style: "normal" | "italic") => void;
+  /** Available font families */
+  fontFamilies: string[];
+}
+
+/**
  * Return type for useSelection hook
  */
 export interface UseSelectionReturn {
@@ -248,6 +268,23 @@ export interface UseImageEditorReturn {
     addCircle: () => void;
     /** Add shape by type */
     add: (type: ShapeType) => void;
+  };
+
+  text: {
+    /** Add text object */
+    add: (initialText?: string) => void;
+    /** Set font size */
+    setFontSize: (size: number) => void;
+    /** Set font family */
+    setFontFamily: (family: string) => void;
+    /** Set text color */
+    setColor: (color: string) => void;
+    /** Set font weight */
+    setFontWeight: (weight: "normal" | "bold") => void;
+    /** Set font style */
+    setFontStyle: (style: "normal" | "italic") => void;
+    /** Available font families */
+    fontFamilies: string[];
   };
 
   selection: {

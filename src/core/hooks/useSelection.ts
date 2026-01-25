@@ -194,7 +194,23 @@ export function useSelection(
       const canvas = canvasRef.current;
       if (!canvas || !selectedObject) return;
 
-      selectedObject.set({ stroke: color });
+      const customObj = selectedObject as EditorFabricObject;
+
+      // Text objects use fill for color, shapes use stroke
+      if (customObj.isText || selectedObject.type === "i-text") {
+        selectedObject.set({
+          fill: color,
+          cornerColor: color,
+          borderColor: color,
+        });
+      } else {
+        selectedObject.set({
+          stroke: color,
+          cornerColor: color,
+          borderColor: color,
+        });
+      }
+
       canvas.renderAll();
     },
     [canvasRef, selectedObject]

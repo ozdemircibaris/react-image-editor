@@ -44,6 +44,7 @@ const DEFAULT_CUSTOM_PROPERTIES = [
   "isDrawing",
   "isShape",
   "shapeType",
+  "isText",
   "selectable",
   "evented",
   "hasControls",

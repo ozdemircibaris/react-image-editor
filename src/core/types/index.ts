@@ -15,6 +15,7 @@ export type {
   EditorFabricCanvas,
   EditorFabricRect,
   EditorFabricPath,
+  EditorFabricIText,
   FabricSelectionEvent,
   FabricPathCreatedEvent,
 } from "./fabric.types";
@@ -33,6 +34,7 @@ export type {
   UseCropReturn,
   UseDrawingReturn,
   UseShapesReturn,
+  UseTextReturn,
   UseSelectionReturn,
   UseZoomReturn,
   UsePanReturn,

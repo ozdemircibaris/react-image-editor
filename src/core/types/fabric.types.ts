@@ -7,7 +7,7 @@ import type { fabric } from "fabric";
 /**
  * Shape types supported by the editor
  */
-export type ShapeType = "rectangle" | "circle";
+export type ShapeType = "rectangle" | "circle" | "text";
 
 /**
  * Editor mode states
@@ -23,7 +23,8 @@ export type EditorTool =
   | "crop"
   | "blur"
   | "rectangle"
-  | "circle";
+  | "circle"
+  | "text";
 
 /**
  * Extended Fabric.js Object with custom properties for the image editor
@@ -33,6 +34,17 @@ export interface EditorFabricObject extends fabric.Object {
   isDrawing?: boolean;
   isBlurPatch?: boolean;
   blurRectId?: string;
+  isShape?: boolean;
+  shapeType?: ShapeType;
+  isText?: boolean;
+}
+
+/**
+ * Extended Fabric.js IText for text objects
+ */
+export interface EditorFabricIText extends fabric.IText {
+  id?: string;
+  isText?: boolean;
   isShape?: boolean;
   shapeType?: ShapeType;
 }

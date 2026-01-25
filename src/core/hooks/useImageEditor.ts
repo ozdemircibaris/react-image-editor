@@ -17,6 +17,7 @@ import { useBlur } from "./useBlur";
 import { useCrop } from "./useCrop";
 import { useDrawing } from "./useDrawing";
 import { useShapes } from "./useShapes";
+import { useText } from "./useText";
 import { useSelection } from "./useSelection";
 import { useZoom } from "./useZoom";
 import { useExport } from "./useExport";
@@ -194,6 +195,12 @@ export function useImageEditor(
     defaultColor: currentColor,
     defaultStrokeWidth: currentStrokeWidth,
     onShapeAdd: () => historyRef.current.saveState(),
+  });
+
+  const text = useText(canvasInstanceRef, originalImageRef, {
+    defaultColor: currentColor,
+    onTextAdd: () => historyRef.current.saveState(),
+    onTextEditEnd: () => historyRef.current.saveState(),
   });
 
   const zoomHook = useZoom(canvasInstanceRef);
@@ -609,6 +616,15 @@ export function useImageEditor(
       addRectangle: shapes.addRectangle,
       addCircle: shapes.addCircle,
       add: shapes.addShape,
+    },
+    text: {
+      add: text.addText,
+      setFontSize: text.setFontSize,
+      setFontFamily: text.setFontFamily,
+      setColor: text.setTextColor,
+      setFontWeight: text.setFontWeight,
+      setFontStyle: text.setFontStyle,
+      fontFamilies: text.fontFamilies,
     },
     selection: {
       enable: selectionHook.enableSelectMode,

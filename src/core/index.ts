@@ -38,6 +38,7 @@ export {
   useCrop,
   useDrawing,
   useShapes,
+  useText,
   useSelection,
   useZoom,
   useExport,
@@ -90,6 +91,7 @@ export type {
   EditorFabricCanvas,
   EditorFabricRect,
   EditorFabricPath,
+  EditorFabricIText,
   // Core types
   ShapeType,
   EditorMode,
@@ -111,6 +113,7 @@ export type {
   UseCropReturn,
   UseDrawingReturn,
   UseShapesReturn,
+  UseTextReturn,
   UseSelectionReturn,
   UseZoomReturn,
   UsePanReturn,
