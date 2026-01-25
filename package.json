@@ -1,7 +1,7 @@
 {
   "name": "@ozdemircibaris/react-image-editor",
   "private": false,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Headless React image editor with blur, crop, shapes, drawing, and undo/redo. Use the hooks for custom UI or the styled components for quick integration.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -24,7 +24,12 @@
     }
   },
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "!dist/**/*.tsbuildinfo",
+    "!dist/core/core",
+    "!dist/core/components",
+    "!dist/core/constants",
     "README.md"
   ],
   "sideEffects": false,
