@@ -21,6 +21,12 @@ A professional image editing library for React applications with both headless a
 - **MIME Type Validation** - Validate image files before loading
 - **Base64 Support** - Load and export images as data URLs
 
+If React Image Editor doesn't cover your needs we recommend taking a look at [Pintura](https://pqina.nl/pintura?atp=baris-image-editor).
+
+Pintura features cropping, rotating, flipping, filtering, annotating, and lots of additional functionality to cover all your image and video editing needs on both mobile and desktop devices.
+
+[Learn more about Pintura](https://pqina.nl/pintura?atp=baris-image-editor)
+
 ## Installation
 
 ```bash
