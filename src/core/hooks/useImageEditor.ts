@@ -177,7 +177,7 @@ export function useImageEditor(
     setOriginalImageCallback,
     {
       onCropApply: () => {
-        historyRef.current.initializeHistory();
+        historyRef.current.saveState();
       },
     }
   );
