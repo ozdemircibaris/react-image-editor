@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from "react";
-import { fabric } from "fabric";
 
 import { Button } from "../UI";
 import { useImageEditor } from "../../core";
@@ -148,15 +147,6 @@ const ImageEditor = (props: IImageEditorProps) => {
     editor.history.save();
   }, [editor.selection, editor.history]);
 
-  // Canvas ready callback - initialize canvas with fabric instance
-  const handleCanvasReady = useCallback(
-    (fabricCanvas: fabric.Canvas) => {
-      // The core hook handles canvas initialization internally
-      // This callback is for compatibility with CanvasEditor
-    },
-    []
-  );
-
   return (
     <div className={`image-editor-container animate-fade-in ${className}`}>
       <div className={`image-editor-header ${headerClassName}`}>
@@ -234,7 +224,7 @@ const ImageEditor = (props: IImageEditorProps) => {
 
       <CanvasEditor
         canvas={editor.canvas}
-        onCanvasReady={handleCanvasReady}
+        canvasRef={editor.canvasRef}
         className={canvasClassName}
         canvasWrapperClassName={canvasWrapperClassName}
         zoomButtonClassName={zoomButtonClassName}
