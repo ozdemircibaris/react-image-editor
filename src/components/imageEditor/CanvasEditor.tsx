@@ -1,10 +1,16 @@
 import { fabric } from "fabric";
-import { useEffect, useRef, useCallback, useState } from "react";
-import { calculateCanvasSize, animateZoomTo } from "../../core/utils/canvas";
+import { useCallback, useEffect, useState } from "react";
+import { animateZoomTo } from "../../core/utils/canvas";
 
 interface CanvasProps {
   canvas: fabric.Canvas | null;
-  onCanvasReady: (canvas: fabric.Canvas) => void;
+  /**
+   * Ref for the underlying <canvas> element. Pass the ref returned by the core
+   * hook (e.g. `editor.canvasRef`). The hook owns canvas creation, sizing,
+   * image loading and window-resize handling — this component only renders the
+   * canvas surface and the interaction chrome (zoom, pan).
+   */
+  canvasRef: React.Ref<HTMLCanvasElement>;
   className?: string;
   zoomButtonClassName?: string;
   background?: string;
@@ -13,78 +19,16 @@ interface CanvasProps {
 
 export const CanvasEditor: React.FC<CanvasProps> = ({
   canvas,
-  onCanvasReady,
+  canvasRef,
   className = "",
   zoomButtonClassName = "",
   background,
   canvasWrapperClassName = "",
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isReady, setIsReady] = useState(false);
   const [isSpaceDown, setIsSpaceDown] = useState(false);
-
-  // Calculate responsive canvas size using core utility
-  const getCanvasSize = useCallback(() => {
-    return calculateCanvasSize(window.innerWidth, window.innerHeight, {
-      mobileBreakpoint: 768,
-      tabletBreakpoint: 1024,
-      mobileMargin: 4,
-      tabletMargin: 50,
-      desktopMargin: 100,
-      mobileAspectRatio: 1,
-      defaultAspectRatio: 16 / 9,
-      minWidth: 200,
-      minHeight: 120,
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!canvasRef.current || canvas) return;
-
-    const timeout = setTimeout(() => {
-      const { width, height } = getCanvasSize();
-
-      const fabricCanvas = new fabric.Canvas(canvasRef.current!);
-      fabricCanvas.setWidth(width);
-      fabricCanvas.setHeight(height);
-      // Use custom background if provided, otherwise transparent
-      const backgroundColor = background || "transparent";
-      fabricCanvas.setBackgroundColor(backgroundColor, () => {
-        fabricCanvas.renderAll();
-      });
-
-      onCanvasReady(fabricCanvas);
-      setIsReady(true);
-    }, 0);
-
-    return () => {
-      clearTimeout(timeout);
-      if (canvas) {
-        try {
-          (canvas as any).dispose?.();
-        } catch {
-          // Canvas might not have dispose method in some versions
-        }
-      }
-    };
-  }, [canvas, onCanvasReady, getCanvasSize, background]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (canvas) {
-        const { width, height } = getCanvasSize();
-        canvas.setWidth(width);
-        canvas.setHeight(height);
-        canvas.renderAll();
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [canvas, getCanvasSize]);
+  // The fabric canvas is created and managed by the core hook via `canvasRef`.
+  // The editor is "ready" once the hook has handed us the canvas instance.
+  const isReady = !!canvas;
 
   // Zoom handlers using core utility
   const handleZoomIn = useCallback(() => {
@@ -162,7 +106,10 @@ export const CanvasEditor: React.FC<CanvasProps> = ({
 
   return (
     <div className={`canvas-container ${className}`}>
-      <div className={`canvas-wrapper ${canvasWrapperClassName}`}>
+      <div
+        className={`canvas-wrapper ${canvasWrapperClassName}`}
+        style={background ? { background } : undefined}
+      >
         <canvas ref={canvasRef} className="canvas-element" />
 
         {/* Zoom controls overlay */}
