@@ -91,6 +91,7 @@ export function createCropRect(imgBounds: Bounds): fabric.Rect {
     cornerSize: 12,
     padding: 2,
     objectCaching: false,
+    excludeFromExport: true,
   } as fabric.IRectOptions);
 }
 

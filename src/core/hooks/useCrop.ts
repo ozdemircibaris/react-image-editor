@@ -211,8 +211,27 @@ export function useCrop(
     // Load cropped image
     return new Promise<void>((resolve) => {
       fabric.Image.fromURL(croppedDataUrl, (img) => {
-        // Clear canvas
-        canvas.clear();
+        const { cropRect: activeRect, overlays, label } = cropStateRef.current;
+
+        // Capture the old image transform before removing it, so existing
+        // annotations (shapes, text, drawings) can be remapped onto the crop.
+        const oldImgLeft = originalImage.left || 0;
+        const oldImgTop = originalImage.top || 0;
+        const oldScaleX = originalImage.scaleX || 1;
+        const oldScaleY = originalImage.scaleY || 1;
+
+        // Top-left of the crop region in canvas (object) coordinates.
+        const cropOriginLeft = oldImgLeft + coords.x * oldScaleX;
+        const cropOriginTop = oldImgTop + coords.y * oldScaleY;
+
+        // Remove only the original image and crop UI; keep annotations.
+        const cropUi = [activeRect, ...overlays, label].filter(
+          Boolean
+        ) as fabric.Object[];
+        const annotations = canvas
+          .getObjects()
+          .filter((obj) => obj !== originalImage && !cropUi.includes(obj));
+        [originalImage, ...cropUi].forEach((obj) => canvas.remove(obj));
 
         // Calculate scale and position for new image
         const canvasWidth = canvas.getWidth();
@@ -251,6 +270,21 @@ export function useCrop(
 
         canvas.add(img);
         img.setCoords();
+        canvas.sendToBack(img);
+
+        // Remap annotations from the old image space onto the cropped image
+        // so they stay aligned with the underlying content.
+        const factorX = scale / oldScaleX;
+        const factorY = scale / oldScaleY;
+        annotations.forEach((obj) => {
+          obj.set({
+            left: position.x + ((obj.left || 0) - cropOriginLeft) * factorX,
+            top: position.y + ((obj.top || 0) - cropOriginTop) * factorY,
+            scaleX: (obj.scaleX || 1) * factorX,
+            scaleY: (obj.scaleY || 1) * factorY,
+          });
+          obj.setCoords();
+        });
 
         // Update state
         setImage(img);
